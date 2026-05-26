@@ -1,9 +1,33 @@
 import re
 import pandas as pd
 
-def creating_sections_of_csv(file_path_to_read: str, file_path_to_write: str) -> None:
+# Find the paitent folder in the data folder
+def find_patient_folder(patients_data_folder: str, patient_id: str) -> dir:
+    prefix = patient_id + "_"
 
-    with open(file_path_to_read, "r", encoding="utf-8") as f:
+    matching_dirs = [
+        p for p in patients_data_folder.rglob("*")
+        if p.is_dir() and p.name.lower().startswith(prefix.lower())
+    ]
+
+    current_patient_data_folder = matching_dirs[0] if matching_dirs else None
+
+    return current_patient_data_folder
+
+# Find the csv file in the folder
+def find_csv_file(folder_path: str) -> list:
+    
+    csv_files = [
+        file.name
+        for file in folder_path.glob("*.csv")
+    ]
+
+    return csv_files
+
+# Cleaning the csv file by removing the section breaks and merging the activity log into a single column
+def cleaning_csv_file(csv_path_to_read: str, csv_path_to_write: str) -> None:
+    
+    with open(csv_path_to_read, "r", encoding="utf-8") as f:
         # 0. read all lines from the file
         lines = f.readlines()
 
@@ -11,43 +35,43 @@ def creating_sections_of_csv(file_path_to_read: str, file_path_to_write: str) ->
     columns_line = lines[0]
     new_columns = columns_line.strip().split(",")
     lines.pop(0)  # remove the header line from the list of lines
-    new_columns.append("Activity_Log") # add a new column for the Activity Log
 
-    # 2. separate lines based on the section break
+    if len(new_columns) == 10:
+        new_columns.append("Activity_Log") # add a new column for the Activity Log
+    
+    # 2. remove section breaks line and merge the Activity Log
     pattern = r"^--- SECTION BREAK:"
-    section_lines = []
-    section_name = None
+    rows = []
 
     for line in lines:
+
         if re.match(pattern, line):
-            cleaned_section_lines = cleaning_section_lines(section_lines)
-            df = pd.DataFrame(cleaned_section_lines, columns=new_columns)
-            
-            if df['Section'].nunique() == 1:
-                section_name = df['Section'].unique()[0]
-                file_path_to_write = f'../../data/cleaned_data_{section_name}.csv'
+            # skip lines like '--- SECTION BREAK:'
+            continue
 
-                # Save the cleaned DataFrame to a new CSV file
-                df.to_csv(file_path_to_write, index=False)
-                
-                # Reset section_lines for the next section
-                section_lines = []
+        elif not re.match(pattern, line):
+            cleaned_line = cleaning_line(line, len(new_columns))
 
-            else:
-                raise ValueError("Multiple sections found in the same section break. Please check the data.")
+            rows.append(cleaned_line)
 
-            continue  # skip the section break line itself
+    #print(new_columns)
+    df = pd.DataFrame(rows, columns=new_columns)
+    
+    return save_df(df, csv_path_to_write)
+    
+def cleaning_line(line: str, num_columns : int) -> list:
 
-        section_lines.append(line)
+    messy_row = line.strip().split(",")
 
+    if num_columns == 11:
+            messy_row[10] = messy_row[10:] # merge all columns from index 10 onwards into a single column for the Activity Log
+            del messy_row[11:] # delete the rest of them
+    
+    return messy_row
 
-def cleaning_section_lines(section_lines: list) -> list:
-    cleaned_section_lines = []
-
-    for line in section_lines:
-        messy_row = line.strip().split(",")
-        messy_row[10] = messy_row[10:] # merge all columns from index 10 onwards into a single column for the Activity Log
-        del messy_row[11:] # delete the rest of them
-        cleaned_section_lines.append(messy_row)
-
-    return cleaned_section_lines
+def save_df(df, csv_path):
+    try:
+        df.to_csv(csv_path, index=False)
+        return True, None
+    except Exception as e:
+        return False, str(e)
