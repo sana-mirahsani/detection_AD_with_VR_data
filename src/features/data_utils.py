@@ -75,3 +75,14 @@ def save_df(df, csv_path):
         return True, None
     except Exception as e:
         return False, str(e)
+
+# feature extraction of tutorial events
+def extract_section(df: pd.DataFrame, section_name: str) -> pd.DataFrame:
+    df_with_one_section = df[df['Section'] == section_name]
+    return df_with_one_section
+
+def extract_event_types(df : pd.DataFrame, events_to_ignore: list) -> list:
+    event_types = df['EventType'].unique()
+    return [event for event in event_types if event not in events_to_ignore]
+
+#def extract_dict_hover_button
