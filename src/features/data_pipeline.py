@@ -55,26 +55,11 @@ def creating_feature_vector_section_default(section_default_df: pd.DataFrame,
     }
     
     # extract section duration
-    row_section_end = section_default_df[section_default_df['EventType']=='SECTION_END']['Activity_Log'].values[0]
-    section_total_time = du.extract_section_duration(row_section_end)
+    section_total_time = du.extract_section_duration(section_default_df)
 
     # fill out hover_dict
-    # hover count
-    filtered_df = du.filter_by_string_contains(section_default_df, 'Activity_Log', 'HoverCount')
-    hover_count_series = du.extract_metric_from_section(filtered_df, du.extract_hover_count)
-    hover_dict["total_hover_count"], _ , _ , _ , _ = du.calculate_metric_stats(hover_count_series, is_counting=True)
-
-    # hover duration
-    filtered_df = du.filter_by_string_contains(section_default_df, 'Activity_Log', 'HoverDuration')
-    hover_duration_series = du.extract_metric_from_section(filtered_df, du.extract_hover_duration)
-    hover_dict["total_hover_duration"], hover_dict["mean_hover_duration"], hover_dict["max_hover_duration"], hover_dict["median_hover_duration"], hover_dict["std_hover_duration"] = du.calculate_metric_stats(hover_duration_series, is_counting=False)
-
-    # hover intensity
-    hover_dict["hover_intensity"] = du.ratio_calculation(hover_dict["total_hover_duration"], section_total_time)
-
-    # hover cv (Coefficient of Variation)
-    hover_dict["cv_hover_duration"] = du.ratio_calculation(hover_dict["std_hover_duration"], hover_dict["mean_hover_duration"])
-
+    hover_dict = du.fill_hover_dict_Default_section(section_default_df, hover_dict, section_total_time)
+    
     # fill out press_dict
     # press count (assumed that for each button pressed, there is a button released too
     filtered_df_button_pressed = du.filter_by_string_contains(section_default_df, 'EventType', 'BUTTON_PRESSED')

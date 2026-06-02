@@ -90,51 +90,42 @@ def filter_on_section(df: pd.DataFrame, section_name: str) -> pd.DataFrame:
     df_with_one_section = df[df['Section'] == section_name]
     return df_with_one_section
 
-def filter_by_string_contains(df: pd.DataFrame, column_name: str, substring: str) -> pd.DataFrame:
-    """
-    Filters the DataFrame to include only rows where the specified column contains a given substring.
-    Args:
-        df (pd.DataFrame): The input DataFrame to filter.
-        column_name (str): The name of the column to check for the substring.
-        substring (str): The substring to look for within the specified column.
-    Returns:
-        pd.DataFrame: A DataFrame containing only the rows where the specified column contains the given substring.
-    """
-    return df[df[column_name].str.contains(substring, na=False)]
-
 # Extraction functions =========================================================
-def extract_section_duration(s: str)-> float:
+def extract_value_from_string(s:str, pattern:str, type_to_extract: type) -> str | float | int | None:
+    """
+    Extracts a value from a string based on a provided regular expression pattern and converts it to the specified type.
+    Args:
+        s (str): The input string from which to extract the value.
+        pattern (str): A regular expression pattern that defines how to extract the desired value from the string. The pattern should include a capturing group for the value to be extracted.
+        type_to_extract (type): The type to which the extracted value should be converted. This can be int, float, or str.
+    Returns:
+        str | float | int | None: The extracted value converted to the specified type, or None if the pattern does not match or if the type conversion fails.
+
+    """
+    match = re.search(pattern, s)
+
+    if match: 
+        if type_to_extract == int:
+            return int(match.group(1))
+        elif type_to_extract == float:
+            return float(match.group(1))
+        else:
+            return match.group(1)
+    else:
+        return None
+
+def extract_section_duration(df: pd.DataFrame) -> float:
     """
     Extracts the duration of a section from Activity log of event_type == section_end.
     Args:       
-        s (str): A string that contains the section end information.
+        df (pd.DataFrame): A DataFrame of one section.
     Returns:        
         float: The duration of the section in seconds, or None if the duration cannot be extracted
     """
-    match = re.search(r"Duration=([0-9]*\.?[0-9]+)", s)
-    return float(match.group(1)) if match else None
+    row_section_end = df[df['EventType']=='SECTION_END']['Activity_Log'].values[0]
+    section_total_time = extract_value_from_string(row_section_end, r"Duration=([0-9]*\.?[0-9]+)", float)
 
-def extract_hover_count(s: str)-> int:
-    """
-    Extracts the hover count from a string of Activity_Log that contains the hover information.
-    Args:       
-        s (str): Value of Activity_Log columns that contains the hover information of HoverCount=
-    Returns:
-        int: The hover count, or None if the hover count cannot be extracted"""
-    
-    match = re.search(r"HoverCount=(\d+)", s)
-    return int(match.group(1)) if match else None
-
-def extract_hover_duration(s: str)-> float:
-    """
-    Extracts the hover duration from a string of Activity_Log that contains the hover information.
-    Args:       
-        s (str): Value of Activity_Log columns that contains the hover information of HoverDuration=
-    Returns:
-        float: The hover duration, or None if the hover duration cannot be extracted."""
-    
-    match = re.search(r"HoverDuration=([0-9]*\.?[0-9]+)", s)
-    return float(match.group(1)) if match else None
+    return section_total_time
 
 def extract_press_duration(s: str)-> float:
     """
@@ -157,23 +148,6 @@ def extract_reading_time_duration(s: str)-> float:
     
     match = re.search(r"ReadingTime=([0-9]*\.?[0-9]+)", s)
     return float(match.group(1)) if match else None
-
-def extract_metric_from_section(filtered_df: pd.DataFrame, function_to_extract_metric: callable) -> pd.Series:
-    """
-    Extracts a specific metric from the 'Activity_Log' column of a filtered DataFrame using a provided extraction function.
-    Args:
-        filtered_df (pd.DataFrame): A DataFrame that has been filtered to contain only the relevant section.
-        function_to_extract_metric (callable): A function that takes a string as input and extracts the desired metric from it.
-    Returns:
-        pd.Series: A pandas Series containing the extracted metric values for each row in the filtered Data
-    """
-    section_metric_values = []
-    for value in filtered_df['Activity_Log']:
-        #print(function_to_extract_metric(value))
-        section_metric_values.append(function_to_extract_metric(value))
-
-    section_metric_values_pandas = pd.Series(section_metric_values)
-    return section_metric_values_pandas
 
 def extract_first_time_hover(section_df: pd.DataFrame) -> float:
     """
@@ -198,25 +172,17 @@ def extract_first_time_press(section_df: pd.DataFrame) -> float:
     return first_click_time
 
 # Calculation functions =========================================================
-def calculate_metric_stats(metric_series: pd.Series, is_counting: bool=True) -> tuple:
+def calculate_duration_metric_stats(metric_series: pd.Series) -> tuple:
     """
     Calculates statistics for a given metric series.
     Args:
         metric_series (pd.Series): The series of metric values.
-        is_counting (bool): Whether the metric is a count (True) or duration (False).
     Returns:
         tuple: A tuple containing the calculated statistics.
     """
-    # calculate total sum for both counting and duration metrics
-    total = round(metric_series.sum(),2)
-    #print("Sum:", total)
-
-    # For counting metrics, we only care about the total sum.
-    if is_counting:
-        total = metric_series.sum()
-        return total, None, None, None, None
     
-    # For duration metrics, we calculate all statistics.
+    # calculate all statistics.
+    total = round(metric_series.sum(), 2)
     mean = round(metric_series.mean(), 2)
     maximum = round(metric_series.max(), 2)
     median = round(metric_series.median(), 2)
@@ -229,6 +195,20 @@ def calculate_metric_stats(metric_series: pd.Series, is_counting: bool=True) -> 
     print("Std:", std)
     """
     return total, mean, maximum, median, std
+
+def calculate_counting_metric_stats(metric_series: pd.Series) -> int:
+    """
+    Calculates statistics for a given metric series.
+    Args:
+        metric_series (pd.Series): The series of metric values.
+    Returns:
+        int: The calculated total sum.
+    """
+
+    # calculate total sum for both counting and duration metrics
+    total = round(metric_series.sum(), 2)
+    #print("Sum:", total)
+    return total
 
 def ratio_calculation(value1: float, value2: float) -> float:
     """
@@ -254,3 +234,60 @@ def calculate_decision_latency(first_hover_time: float, first_press_time: float)
     """
     time_difference = first_press_time - first_hover_time
     return time_difference
+
+# Fill out dictionary function =========================================================
+def fill_hover_dict_Default_section(section_df, hover_dict, section_total_time):
+    """
+    Fill out the hover dictionary only for Default section.
+    Args:
+        section_df (pd.DataFrame): A DataFrame containing only rows of Default section.
+        hover_dict (dict): A dictionary to store the hover metrics.
+        section_total_time (float): The total time for the section.
+    Returns:
+        dict: The filled hover dictionary with calculated metrics.
+    """
+    # hover count
+    hover_count_series_1 = section_df['Activity_Log'].apply(extract_value_from_string, pattern=r"HoverCount=([0-9]+)", type_to_extract=int)
+    hover_dict["total_hover_count"] = calculate_counting_metric_stats(hover_count_series_1) 
+
+    # hover duration
+    hover_duration_series = section_df['Activity_Log'].apply(extract_value_from_string, pattern=r"HoverDuration=([0-9]*\.?[0-9]+)", type_to_extract=float)
+    hover_dict["total_hover_duration"], hover_dict["mean_hover_duration"], hover_dict["max_hover_duration"], hover_dict["median_hover_duration"], hover_dict["std_hover_duration"] = calculate_duration_metric_stats(hover_duration_series)
+
+    # hover intensity
+    hover_dict["hover_intensity"] = ratio_calculation(hover_dict["total_hover_duration"], section_total_time)
+
+    # hover cv (Coefficient of Variation)
+    hover_dict["cv_hover_duration"] = ratio_calculation(hover_dict["std_hover_duration"], hover_dict["mean_hover_duration"])
+
+    return hover_dict
+
+def fill_hover_dict_ButtonSelection_section(section_df, hover_dict, section_total_time):
+    """
+    Fill out the hover dictionary only for ButtonSelection section.
+    Args:
+        section_df (pd.DataFrame): A DataFrame containing only rows of ButtonSelection section.
+        hover_dict (dict): A dictionary to store the hover metrics.
+        section_total_time (float): The total time for the section.
+    Returns:
+        dict: The filled hover dictionary with calculated metrics.
+    """
+
+    # hover count
+    hover_count_series_1 = section_df['Activity_Log'].apply(extract_value_from_string, pattern=r"HoverCount=([0-9]+)", type_to_extract=int)
+
+    hover_count_series_2 = section_df['Activity_Log'].apply(extract_value_from_string, pattern=r"TotalHovers=([0-9]+)", type_to_extract=int)
+
+    hover_dict["total_hover_count"] = calculate_counting_metric_stats(hover_count_series_1) + calculate_counting_metric_stats(hover_count_series_2)
+
+    # hover duration
+    hover_duration_series = section_df['Activity_Log'].apply(extract_value_from_string, pattern=r"HoverDuration=([0-9]*\.?[0-9]+)", type_to_extract=float)
+    hover_dict["total_hover_duration"], hover_dict["mean_hover_duration"], hover_dict["max_hover_duration"], hover_dict["median_hover_duration"], hover_dict["std_hover_duration"] = calculate_duration_metric_stats(hover_duration_series)
+
+    # hover intensity
+    hover_dict["hover_intensity"] = ratio_calculation(hover_dict["total_hover_duration"], section_total_time)
+
+    # hover cv (Coefficient of Variation)
+    hover_dict["cv_hover_duration"] = ratio_calculation(hover_dict["std_hover_duration"], hover_dict["mean_hover_duration"])
+
+    return hover_dict
