@@ -33,16 +33,18 @@
 ### Event vector
 | Feature Type | CSV File | calculation method | Event typed to be used |
 |------------|------------|------------|------------|
-| phase_name | Both | extract from csv file name | - |
+| phase_name | events | extract from csv file name | - |
 | phase_duration | events | extract from 'Duration_s' | Phase_End |
 | reading_time_total,mean,median,std,max | events | extract from 'Activity_log' in all PANEL_DISMISSED| PANEL_DISMISSED|
+| reading_time_intensity |events|total_reading_time_duration/phase_duration | - |
 | hover_count_total,hover_duration_total,mean,median,std,max | events | extract from 'Activity_log'| BUTTON_CLICKED,BUTTON_HOVER_START,HOVER_START|
 | cv_hover_duration | events |std_hover_duration/mean_hover_duration (Coefficient of Variation) | - |
 | hover_intensity |events|total_hover_duration/phase_duration | - |
 | press_count_total,press_duration_total,mean,median,std,max | events | extract from 'Activity_log'| BUTTON_CLICKED,BUTTON_Pressed,BUTTON_SECTION_COMPLETE|
-| press_intensity | events |  std_press_duration / mean_press_duration  (Coefficient of Variation) | - |
+| press_intensity | events |total_press_duration/phase_duration| - |
 | total_grab_count | events|count number of GRAB_START(not sure)  | - |
 | total_grib_duration, mean, median, std, max  |events| extract from 'Activity_log' | Grab_realease |
+| grab_intensity | events |total_grab_duration/phase_duration| - |
 | total_gaze_count | events |  count number of GAZE_START(not sure)  |  |
 | total_gaze_duration, mean, median, std, max  | events |  extract from 'Activity_log' | Gaze_realease |
 | gaze_intensity | events |  total_gaze_duration / phase_duration  | - |
@@ -53,6 +55,7 @@
 |clicks_per_second | events | total_press_count/phase_duration | - |
 |hovers_per_click | events | total_hover_count/total_press_count| - |
 |time_before_first_press | events | extract from PhaseTime_s| BUTTON_PRESSED or BUTTON_CLICKED |
+|time_before_first_hover | events | extract from PhaseTime_s| BUTTON_HOVER or HOVER_START |
 
 ### Trajectory vector
 | Feature Type | calculation method | What information does it give |
@@ -74,8 +77,8 @@
 |Pitch_range|calculate from HMD_Pitch column|Orientation|
 |Roll_range|calculate from HMD_Roll column|Orientation|
 |exploration_index| Yaw_range + Pitch_range |Exploration |
-|dominant_hand_total_distance|distance += sqrt((dx)**2 + (dy)**2 + (dz)**2)||
-|not_dominant_hand_total_distance|distance += sqrt((dx)**2 + (dy)**2 + (dz)**2)||
+|dominant_hand_total_distance|distance += sqrt((dx)**2 + (dy)**2 + (dz)**2)|Distance|
+|not_dominant_hand_total_distance|distance += sqrt((dx)**2 + (dy)**2 + (dz)**2)|Distance|
 |dominant_hand_mean_speed|with phasetime_s column| hand speed|
 |not_dominant_hand_mean_speed|with phasetime_s column|hand speed|
 |dominant_hand_max_speed|with phasetime_s column|hand speed|
@@ -87,13 +90,13 @@
 |not_dominant_hand_y_range|(right)LeftCtrl_Y|workspace_volume|
 |not_dominant_hand_z_range|(right)LeftCtrl_Z|workspace_volume|
 |dominant_hand_trigger_active_time||Active time|
-|not_dominant_trigger_active_time||Active time|
+|not_dominant_hand_trigger_active_time||Active time|
 |dominant_hand_trigger_press_count||Press count|
-|not_dominant_trigger_press_count||Press count|
-|dominant_hand_grab_count|||
-|not_dominant_grab_count|||
-|dominant_hand_mean_grip_duration|||
-|not_dominant_mean_grip_duration|||
+|not_dominant_hand_trigger_press_count||Press count|
+|dominant_hand_grab_count||Grab|
+|not_dominant_hand_grab_count||Grab|
+|dominant_hand_mean_grap_duration||Grab|
+|not_dominant_hand_mean_grap_duration||Grab|
 |hand_movement_symmetry|||
 |gaze_target_counts|فراوانی نگاه به هر هدف||
 |gaze_switch_count||
@@ -102,7 +105,7 @@ Number of column (for one phase) after feature extraction for both trajectory + 
 
 Number of column (for all 4 phases) =~ 4 * 60
 
-## Global Feature Vector of all phases together (one paitent)
+## (Global) Paitent-Level Feature Vector of all phases together (one paitent)
 | Feature Type | calculation method | What does it mean | Phase_name |
 |------------|------------|------------|------------|
 |Object_recognition_accuracy|ROUND_RESULT/SCORING_SUMMARY| Direct measure of object recognition|ObjectRecognition_events|
@@ -131,7 +134,7 @@ Number of column (for all 4 phases) =~ 4 * 60
 
 ## Final vector feature
 Paitent_id, Age, Gender, Sessions_Completed_out_of_4, Help_Rating_out_of_5, 
-Local feature vector (all four phases), Global feature
+Phase-Level Features (Trajectory+Event), Paitent-Level feature
 
 total columns for one paitent : 288
 
