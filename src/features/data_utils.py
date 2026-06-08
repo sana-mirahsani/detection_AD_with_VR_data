@@ -1,6 +1,7 @@
 import re
 import pandas as pd
 from datetime import datetime
+import numpy as np
 
 # Reading_Writing functions =========================================================
 # Find the paitent folder in the data folder
@@ -80,7 +81,7 @@ def save_df(df, csv_path):
         return False, str(e)
 
 # Extraction functions =========================================================
-def extract_value_from_string(s:str, pattern_list:list, type_to_extract: type) -> list | None:
+def extract_value_from_string(s:str, pattern_list:list) -> str | None:
     """
     Extracts a value from a string based on a provided regular expression pattern and converts it to the specified type.
     Args:
@@ -88,23 +89,18 @@ def extract_value_from_string(s:str, pattern_list:list, type_to_extract: type) -
         pattern (str): A regular expression pattern that defines how to extract the desired value from the string. The pattern should include a capturing group for the value to be extracted.
         type_to_extract (type): The type to which the extracted value should be converted. This can be int, float, or str.
     Returns:
-        list | None: The extracted value converted to the specified type, or None if the pattern does not match or if the type conversion fails.
+        str | None: The extracted value converted (str), or None if the pattern does not match.
     """
+  
     combined_patterns = '|'.join(pattern_list)
     
     matches = re.search(combined_patterns, s)
     
-    
-    if matches: 
-        if type_to_extract == int:
-            return int(matches.group(1))
-        elif type_to_extract == float:
-            return float(matches.group(1))
-        else:
-            return matches.group(1)
+    if matches:
+        return matches.group(1)
     else:
-        return None
-
+        None
+    
 def extract_phase_duration(df:pd.DataFrame)-> float:
     """
     Extracts the duration of a phase.
@@ -115,6 +111,17 @@ def extract_phase_duration(df:pd.DataFrame)-> float:
     """
     phase_duration = df[df['EventType']=='PHASE_END']['PhaseTime_s'].values[0] 
     return phase_duration
+
+def extract_event_first_time(df: pd.DataFrame, events:list) -> float:
+    """
+    Extracts the time of the first time of an event from a DataFrame.
+    Args:   
+        df (pd.DataFrame): A DataFrame which should include 'EventType' and 'PhaseTime_s' columns.
+    Returns:
+        PhaseTime: Time in second for the first time that an event is occured.
+    """
+    PhaseTime = df[df['EventType'].isin(events)].iloc[0]['PhaseTime_s']
+    return PhaseTime
 
 # Calculation functions =========================================================
 def calculate_duration_metric_stats(metric_series: pd.Series) -> tuple:
@@ -180,4 +187,113 @@ def calculate_decision_latency(first_hover_time: float, first_press_time: float)
     time_difference = first_press_time - first_hover_time
     return time_difference
 
+def calculate_total_head_distance(df: pd.DataFrame) -> float:
+    """
+    Calculate total head movement by the distance of the three axis.
+    Args:
+        df(DataFrame): the trajectory file csv.
+    Returns:
+        float: the Total distance.
+    """
+    df['moved_distance'] = None
+
+    for index in range(len(df)):
+        
+        if index == 0:
+            df.loc[index, 'moved_distance'] = 0
+            continue
+
+        x = pow((df['HMD_X'].iloc[index-1] - df['HMD_X'].iloc[index]),2)
+        y = pow((df['HMD_Y'].iloc[index-1] - df['HMD_Y'].iloc[index]),2)
+        z = pow((df['HMD_Z'].iloc[index-1] - df['HMD_Z'].iloc[index]),2)
+
+        moved_distance = np.sqrt(x+y+z)
+        df.loc[index, 'moved_distance'] = round(moved_distance,2)
+
+    total_distance = round(df['moved_distance'].sum(),2)
+    return total_distance
+
+def calculate_head_distance_speed_metrics(df: pd.DataFrame) -> tuple:
+    df['head_distance_speed'] = None
+    time_difference = None
+
+    for index in range(len(df)):
+
+        if index == 0:
+            df.loc[index, 'head_distance_speed'] = 0
+            continue
+
+        time_difference = abs(df.loc[index, 'PhaseTime_s'] - df.loc[index-1, 'PhaseTime_s'])
+
+        df.loc[index, 'head_distance_speed'] = df.loc[index, 'moved_distance'] / time_difference
+
+    mean_head_speed = round(df['head_distance_speed'].mean(),2)
+    max_head_speed  = round(df['head_distance_speed'].max(),2)
+    std_head_speed  = round(df['head_distance_speed'].std(),2)
+
+    return mean_head_speed, max_head_speed, std_head_speed
+
+def calculate_total_head_orientation(df: pd.DataFrame) -> float:
+    """
+    Calculate total head orientation by the angle of the three axis.
+    Args:
+        df(DataFrame): the trajectory file csv.
+    Returns:
+        float: the Total orientation has taken.
+    """
+    df['moved_orientation'] = None
+
+    for index in range(len(df)):
+        
+        if index == 0:
+            df.loc[index, 'moved_orientation'] = 0
+            continue
+
+        yaw   = pow((df['HMD_Yaw'].iloc[index-1] - df['HMD_Yaw'].iloc[index]),2)
+        pitch = pow((df['HMD_Pitch'].iloc[index-1] - df['HMD_Pitch'].iloc[index]),2)
+        roll  = pow((df['HMD_Roll'].iloc[index-1] - df['HMD_Roll'].iloc[index]),2)
+
+        moved_orientation = np.sqrt(yaw+pitch+roll)
+        df.loc[index, 'moved_orientation'] = round(moved_orientation,2)
+
+    total_orientation = round(df['moved_orientation'].sum(),2)
+    return total_orientation
+
+def calculate_head_orientation_speed_metrics(df: pd.DataFrame) -> tuple:
+    
+    df['head_orientation_speed'] = None
+    time_difference = None
+
+    for index in range(len(df)):
+
+        if index == 0:
+            df.loc[index, 'head_orientation_speed'] = 0
+            continue
+
+        time_difference = abs(df.loc[index, 'PhaseTime_s'] - df.loc[index-1, 'PhaseTime_s'])
+        
+        df.loc[index, 'head_orientation_speed'] = df.loc[index, 'moved_orientation'] / time_difference
+
+    mean_head_speed = round(df['head_orientation_speed'].mean(),2)
+    max_head_speed  = round(df['head_orientation_speed'].max(),2)
+    std_head_speed  = round(df['head_orientation_speed'].std(),2)
+    return mean_head_speed, max_head_speed, std_head_speed
+
+def calculate_switch_count(df: pd.DataFrame) -> int:
+    
+    if df['GazeTarget'].nunique() == 1:return 0
+
+    else:
+        objs = list(df['GazeTarget'].dropna().unique())
+        current_obj  = objs[0]
+        switch_count = 0
+
+        for index in range(len(df)):
+            if df.loc[index, 'GazeTarget']: # not none
+                if current_obj != df.loc[index, 'GazeTarget']:
+                    switch_count +=1
+                    current_obj = df.loc[index, 'GazeTarget']
+
+        return switch_count
+    
 # Fill out dictionary function =========================================================

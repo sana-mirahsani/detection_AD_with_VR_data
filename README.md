@@ -38,7 +38,6 @@
 | reading_time_total,mean,median,std,max | events | extract from 'Activity_log' in all PANEL_DISMISSED| PANEL_DISMISSED|
 | reading_time_intensity |events|total_reading_time_duration/phase_duration | - |
 | hover_count_total,hover_duration_total,mean,median,std,max | events | extract from 'Activity_log'| BUTTON_CLICKED,BUTTON_HOVER_START,HOVER_START|
-| cv_hover_duration | events |std_hover_duration/mean_hover_duration (Coefficient of Variation) | - |
 | hover_intensity |events|total_hover_duration/phase_duration | - |
 | press_count_total,press_duration_total,mean,median,std,max | events | extract from 'Activity_log'| BUTTON_CLICKED,BUTTON_Pressed,BUTTON_SECTION_COMPLETE|
 | press_intensity | events |total_press_duration/phase_duration| - |
@@ -67,16 +66,18 @@
 |HMD_X_range|max(X)-min(X)|Position|  
 |HMD_Y_range|max(Y)-min(Y)|Position|  
 |HMD_Z_range|max(Z)-min(Z)|Position|
-|mean_head_speed|dt = t[i] - t[i-1], t = PhaseTime_s, speed = distance / dt|Speed|  
-|max_head_speed|dt = t[i] - t[i-1], t = PhaseTime_s, speed = distance / dt|Speed|  
-|std_head_speed|dt = t[i] - t[i-1], t = PhaseTime_s, speed = distance / dt|Speed| 
+|mean_head_speed_in_distance|dt = t[i] - t[i-1], t = PhaseTime_s, speed = distance / dt|Speed|  
+|max_head_speed_in_distance|dt = t[i] - t[i-1], t = PhaseTime_s, speed = distance / dt|Speed|  
+|std_head_speed_in_distance|dt = t[i] - t[i-1], t = PhaseTime_s, speed = distance / dt|Speed| 
 |Yaw_std|calculate from HMD_Yaw column|Orientation|
 |Pitch_std|calculate from HMD_Pitch column|Orientation|
 |Roll_std|calculate from HMD_Roll column|Orientation|
 |Yaw_range|calculate from HMD_Yaw column|Orientation|
 |Pitch_range|calculate from HMD_Pitch column|Orientation|
 |Roll_range|calculate from HMD_Roll column|Orientation|
-|exploration_index| Yaw_range + Pitch_range |Exploration |
+|mean_head_speed_in_orientation| dt = t[i] - t[i-1], t = PhaseTime_s, speed = oriantation / dt |Exploration |
+|max_head_speed_in_orientation| dt = t[i] - t[i-1], t = PhaseTime_s, speed = oriantation / dt |Exploration |
+|std_head_speed_in_orientation| dt = t[i] - t[i-1], t = PhaseTime_s, speed = oriantation / dt |Exploration |
 |dominant_hand_total_distance|distance += sqrt((dx)**2 + (dy)**2 + (dz)**2)|Distance|
 |not_dominant_hand_total_distance|distance += sqrt((dx)**2 + (dy)**2 + (dz)**2)|Distance|
 |dominant_hand_mean_speed|with phasetime_s column| hand speed|
@@ -98,7 +99,7 @@
 |dominant_hand_mean_grap_duration||Grab|
 |not_dominant_hand_mean_grap_duration||Grab|
 |hand_movement_symmetry|||
-|gaze_target_counts|فراوانی نگاه به هر هدف||
+|gaze_obj_looked_ratio|به هر هدفی||
 |gaze_switch_count||
 
 Number of column (for one phase) after feature extraction for both trajectory + events file =~ 60
@@ -133,9 +134,18 @@ Number of column (for all 4 phases) =~ 4 * 60
 23 columns for one paitent.
 
 ## Final vector feature
-Paitent_id, Age, Gender, Sessions_Completed_out_of_4, Help_Rating_out_of_5, 
+Paitent_id, Age, Gender, Sessions_Completed_out_of_4, Help_Rating_out_of_5, dominant_hand,
 Phase-Level Features (Trajectory+Event), Paitent-Level feature
 
-total columns for one paitent : 288
+total columns for one paitent : 6 + 4*60 + 23 = 269
 
 
+flowchart + demo
+
+articles about feature extraction 
+https://pmc.ncbi.nlm.nih.gov/articles/PMC12776604/ 
+https://pubmed.ncbi.nlm.nih.gov/37862101/
+https://pubmed.ncbi.nlm.nih.gov/37862101/
+Gaze analysis: A survey on its applications 
+
+['Round=1', 'TargetObject=Carrot', 'SelectedObject=Carrot', 'Correct=True', 'ResponseTime=4.55s', 'CorrectSide=right', 'SelectedSide=right']
