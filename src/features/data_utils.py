@@ -135,11 +135,11 @@ def calculate_duration_metric_stats(metric_series: pd.Series) -> tuple:
     """
     
     # calculate all statistics.
-    total = round(metric_series.sum(), 2)
-    mean = round(metric_series.mean(), 2)
+    total   = round(metric_series.sum(), 2)
+    mean    = round(metric_series.mean(), 2)
     maximum = round(metric_series.max(), 2)
-    median = round(metric_series.median(), 2)
-    std = round(metric_series.std(), 2)
+    median  = round(metric_series.median(), 2)
+    std     = round(metric_series.std(), 2)
 
     """
     print("Mean:", mean)
@@ -614,3 +614,32 @@ def filling_obj_recognition_dict(df: pd.DataFrame, obj_recognition:dict) -> dict
         sys.exit("Stopping program")
 
     return obj_recognition
+
+def filling_visuospatial_dict(df: pd.DataFrame, visuospatial_dict) -> dict:
+
+    # extracting
+    string_activity_log = df[(df['Section'] == 'Completion') & (df['EventType'] == 'VISUOSPATIAL_COMPLETE')]['Activity_Log'].iloc[0]
+    total_time_string = extract_value_from_string(string_activity_log, pattern_list=[r"Time=([0-9]*\.?[0-9]+)"])
+
+    # filling
+    visuospatial_dict["visuospatial_total_duration"] = float(total_time_string)
+
+    # extracting
+    string_activity_log   = df[(df['Section'] == 'Completion') & (df['EventType'] == 'VISUOSPATIAL_COMPLETE')]['Activity_Log'].iloc[0]
+    num_correct_placement = extract_value_from_string(string_activity_log, pattern_list=[r"Correct=([0-9]+)"])
+    num_total_object      = extract_value_from_string(string_activity_log, pattern_list=[r"Total=([0-9]+)"])
+
+    # filling
+    visuospatial_dict["visuospatial_score"] = ratio_calculation(value1=float(num_correct_placement), value2=float(num_total_object))
+
+    # filling
+    visuospatial_dict["visuospatial_total_wrong_placement"] = (df['EventType'] == "SOCKET_REJECTION").sum()
+
+    # check none values
+    has_none = any(value is None for value in visuospatial_dict.values())
+
+    if has_none:
+        print('None value found in visuospatial_dict!!!')
+        sys.exit("Stopping program")
+
+    return visuospatial_dict
