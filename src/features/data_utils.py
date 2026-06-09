@@ -2,6 +2,7 @@ import re
 import pandas as pd
 from datetime import datetime
 import numpy as np
+import sys
 
 # Reading_Writing functions =========================================================
 # Find the paitent folder in the data folder
@@ -361,4 +362,255 @@ def calculate_trigger_or_grip_hand_metrics(df: pd.DataFrame, hand: str, action: 
     press_count   = df[df[column_name]!= 0.0][column_name].size
 
     return press_count, pressure_mean
+
 # Fill out dictionary function =========================================================
+def filling_reading_time_dict(df: pd.DataFrame, reading_time_dict: dict, phase_duration: float) -> dict:
+
+    # extracting
+    reading_time_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=[r"ReadingTime=([0-9]*\.?[0-9]+)"])
+
+    # cleaning
+    reading_time_series = reading_time_series.dropna()
+    reading_time_series = reading_time_series.astype(float)
+
+    # filling dict
+    reading_time_dict['total_reading_time'], reading_time_dict['mean_reading_time'], reading_time_dict['max_reading_time'], reading_time_dict['median_reading_time'], reading_time_dict['std_reading_time']= calculate_duration_metric_stats(metric_series=reading_time_series)
+
+    reading_time_dict['intensity_reading_time'] = ratio_calculation(
+                                                    value1=reading_time_dict['total_reading_time'],
+                                                    value2=phase_duration
+                                                    )
+
+    # check none values
+    has_none = any(value is None for value in reading_time_dict.values())
+
+    if has_none:
+        print('None value found in reading_time_dict!!!')
+        sys.exit("Stopping program")
+
+    return reading_time_dict
+
+def filling_hover_dict(df: pd.DataFrame, hover_dict: dict, phase_duration: float)-> dict:
+    
+    patterns = [r"HoverCount=([0-9]+)", 
+                r"TotalHovers=([0-9]+)"]
+
+    # extracting and cleaning
+    hover_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=patterns)
+    hover_series = hover_series.dropna()
+    hover_series = hover_series.astype(float)
+
+    # filling
+    hover_dict['total_count_hover'] = int(calculate_counting_metric_stats(metric_series=hover_series))
+
+    patterns = [r"HoverDuration=([0-9]*\.?[0-9]+)"]
+
+    # extracting and cleaning
+    hover_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=patterns)
+    hover_series = hover_series.dropna()
+    hover_series = hover_series.astype(float)
+
+    # filling
+    hover_dict['total_duration_hover'], hover_dict['max_duration_hover'], hover_dict['mean_duration_hover'], hover_dict['median_duration_hover'], hover_dict['std_duration_hover'] = calculate_duration_metric_stats(metric_series=hover_series)
+
+    # filling
+    hover_dict['intensity_hover'] = round(hover_dict['total_duration_hover']/phase_duration,2)
+
+    # check none values
+    has_none = any(value is None for value in hover_dict.values())
+
+    if has_none:
+        print('None value found in hover_dict!!!')
+        sys.exit("Stopping program")
+
+    return hover_dict
+
+def filling_press_dict(df: pd.DataFrame, press_dict: dict, phase_duration: float)-> dict:
+
+    # extract
+    press_df = df[df['EventType'].isin(['BUTTON_PRESSED','BUTTON_CLICKED'])]
+
+    # filling
+    press_dict['total_count_press']=len(press_df)
+
+    # extract and cleaning
+    patterns = [r"PressDuration=([0-9]*\.?[0-9]+)"]
+    press_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=patterns)
+    press_series = press_series.dropna()
+    press_series = press_series.astype(float)
+
+    # filling
+    press_dict['total_duration_press'], press_dict['max_duration_press'], press_dict['mean_duration_press'], press_dict['median_duration_press'], press_dict['std_duration_press'] = calculate_duration_metric_stats(metric_series=press_series)
+
+    # filling
+    press_dict['intensity_press'] = round(press_dict['total_duration_press']/phase_duration,2)
+
+    # check none values
+    has_none = any(value is None for value in press_dict.values())
+
+    if has_none:
+        print('None value found in press_dict!!!')
+        sys.exit("Stopping program")
+
+    return press_dict
+
+def filling_grab_dict(df: pd.DataFrame, grab_dict: dict, phase_duration: float)-> dict:
+
+    # extract
+    grab_df = df[df['EventType'].isin(['GRAB_RELEASE','GRAB_PRACTICE_PLACEMENT'])]
+
+    # filling
+    grab_dict['total_count_grab']=len(grab_df)
+    
+    # extract
+    grab_series = df[df['EventType'].isin(['GRAB_RELEASE'])]['Duration_s']
+
+    # filling
+    grab_dict['total_duration_grab'], grab_dict['max_duration_grab'], grab_dict['mean_duration_grab'], grab_dict['median_duration_grab'], grab_dict['std_duration_grab'] = calculate_duration_metric_stats(metric_series=grab_series)
+    grab_dict['intensity_grab'] = round(grab_dict['total_duration_grab']/phase_duration,2)
+
+    # check none values
+    has_none = any(value is None for value in grab_dict.values())
+
+    if has_none:
+        print('None value found in grab_dict!!!')
+        sys.exit("Stopping program")
+
+    return grab_dict
+
+def filling_gaze_dict(df: pd.DataFrame, gaze_dict: dict, phase_duration: float)-> dict:
+
+    # extract
+    gaze_df = df[df['EventType'].isin(['GAZE_END'])]
+    
+    # filling
+    gaze_dict['total_count_gaze'] = len(gaze_df)
+
+    # extract and cleaning
+    patterns = [r"DwellTime=([0-9]*\.?[0-9]+)"]
+    gaze_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=patterns)
+    gaze_series = gaze_series.dropna()
+    gaze_series = gaze_series.astype(float)
+
+    # filling
+    gaze_dict['total_duration_gaze'], gaze_dict['max_duration_gaze'], gaze_dict['mean_duration_gaze'], gaze_dict['median_duration_gaze'], gaze_dict['std_duration_gaze'] = calculate_duration_metric_stats(metric_series=gaze_series)
+
+    # filling
+    gaze_dict['intensity_gaze'] = round(gaze_dict['total_duration_gaze']/phase_duration,2)
+
+    # check none values
+    has_none = any(value is None for value in gaze_dict.values())
+
+    if has_none:
+        print('None value found in gaze_dict!!!')
+        sys.exit("Stopping program")
+
+    return gaze_dict
+
+def filling_behavior_dict(df: pd.DataFrame, behavior_dict: dict, hover_dict: dict, press_dict: dict, reading_time_dict: dict, phase_duration: float)-> dict:
+    
+    # extract
+    first_hover_time = extract_event_first_time(df, ['BUTTON_HOVER_START'])
+    first_press_time = extract_event_first_time(df, ['BUTTON_PRESSED','BUTTON_CLICKED'])
+
+    # filling
+    behavior_dict["hover_vs_active_interaction_ratio"] = ratio_calculation(hover_dict["total_duration_hover"], press_dict["total_duration_press"])
+    behavior_dict["hover_vs_reading_time_ratio"]       = ratio_calculation(hover_dict["total_duration_hover"], reading_time_dict["total_reading_time"])
+    behavior_dict["interaction_fraction"]              = ratio_calculation((hover_dict["total_duration_hover"] + press_dict["total_duration_press"]), phase_duration)
+    behavior_dict["decision_latency"]                  = calculate_decision_latency(first_hover_time, first_press_time)
+    behavior_dict["clicks_per_second"]                 = ratio_calculation(press_dict["total_count_press"], phase_duration)
+    behavior_dict["hovers_per_click"]                  = ratio_calculation(hover_dict["total_count_hover"], press_dict["total_count_press"])
+
+    # check none values
+    has_none = any(value is None for value in behavior_dict.values())
+
+    if has_none:
+        print('None value found in behavior_dict!!!')
+        sys.exit("Stopping program")
+
+    return behavior_dict
+
+def filling_temporal_dict(df: pd.DataFrame, temporal_dict: dict) -> dict:
+
+    # extract
+    first_hover_time = extract_event_first_time(df, ['BUTTON_HOVER_START'])
+    first_press_time = extract_event_first_time(df, ['BUTTON_PRESSED','BUTTON_CLICKED'])
+
+    # filling
+    temporal_dict['time_before_first_press'] = first_press_time
+    temporal_dict['time_before_first_hover'] = first_hover_time
+
+    # check none values
+    has_none = any(value is None for value in temporal_dict.values())
+
+    if has_none:
+        print('None value found in temporal_dict!!!')
+        sys.exit("Stopping program")
+
+    return temporal_dict
+
+def filling_obj_recognition_dict(df: pd.DataFrame, obj_recognition:dict) -> dict:
+
+    # initial
+    total_successful_round = 0
+    arr_success_duration   = np.array([])
+    arr_choose_wrong_obj   = np.array([])
+
+    # extract
+    patterns  = [r"TotalRounds=([0-9]+)"]
+    round_num = df[df['EventType']=='GAME_START']['Activity_Log'].apply(extract_value_from_string, pattern_list=patterns)
+
+    round_num = int(round_num.iloc[0])
+
+    # extract and calculate for each round
+    for round in range(round_num):
+        
+        round_name = f'Round{round+1}'
+
+        start_index = df[(df['Section'] == round_name) & (df['EventType'] == 'SECTION_START')].index
+        end_index   = df[(df['Section'] == round_name) & (df['EventType'] == 'SECTION_END')].index
+
+        if (len(start_index) != 1) and (len(end_index) != 1):
+            raise ValueError("More than 1 start or end index!!!")
+        
+        round_df = df.iloc[start_index[0]:end_index[0]]
+
+        # feautre 1 : 
+        is_successful = 'SELECTION_CORRECT' in round_df['EventType'].values
+
+        # feature 2:
+        if is_successful:
+            total_successful_round += 1
+
+            success_duration = round_df[round_df['EventType']=='SELECTION_CORRECT']['Duration_s'].iloc[0]
+            arr_success_duration = np.append(arr_success_duration, success_duration)
+        
+        else:
+            success_duration = None
+
+        # feature 3:
+        patterns = [r"IsCorrect=([^\W]+)"]
+        round_series = round_df['Activity_Log'].apply(extract_value_from_string,pattern_list=patterns)
+        num_wrong_obj_chosen = (round_series == 'False').sum()
+
+        arr_choose_wrong_obj = np.append(arr_choose_wrong_obj, num_wrong_obj_chosen)
+
+    # filling
+    obj_recognition["score"] = ratio_calculation(value1 = total_successful_round, value2 = round_num)
+    obj_recognition["mean_success_duration"]  = round(np.mean(arr_success_duration), 2)
+    obj_recognition["mean_choose_wrong_obj"]  = round(np.mean(arr_choose_wrong_obj), 2)
+
+    # extract
+    accuracy = df[(df['Section'] == 'Summary') & (df['EventType'] == 'GAME_COMPLETE')]['Activity_Log'].apply(extract_value_from_string, pattern_list = [r"Accuracy=([\d.]+)%"])
+
+    # filling
+    obj_recognition["accuracy"] = accuracy.iloc[0]
+
+    # check none values
+    has_none = any(value is None for value in obj_recognition.values())
+
+    if has_none:
+        print('None value found in obj_recognition!!!')
+        sys.exit("Stopping program")
+
+    return obj_recognition
