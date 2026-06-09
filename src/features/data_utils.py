@@ -280,7 +280,7 @@ def calculate_head_orientation_speed_metrics(df: pd.DataFrame) -> tuple:
     return mean_head_speed, max_head_speed, std_head_speed
 
 def calculate_switch_count(df: pd.DataFrame) -> int:
-    
+
     if df['GazeTarget'].nunique() == 1:return 0
 
     else:
@@ -295,5 +295,70 @@ def calculate_switch_count(df: pd.DataFrame) -> int:
                     current_obj = df.loc[index, 'GazeTarget']
 
         return switch_count
+
+def calculate_total_hand_distance(df: pd.DataFrame, hand: str) -> float:
+    """
+    Calculate total hand movement by the distance of the three axis.
+    Args:
+        df(DataFrame): the trajectory file csv.
+    Returns:
+        float: the Total distance.
+    """
+    name_column     = f'{hand}_moved_distance'
+    df[name_column] = None
+
+    for index in range(len(df)):
+        
+        if index == 0:
+            df.loc[index, name_column] = 0
+            continue
+
+        x = pow((df[f'{hand}Ctrl_X'].iloc[index-1] - df[f'{hand}Ctrl_X'].iloc[index]),2)
+        y = pow((df[f'{hand}Ctrl_Y'].iloc[index-1] - df[f'{hand}Ctrl_Y'].iloc[index]),2)
+        z = pow((df[f'{hand}Ctrl_Z'].iloc[index-1] - df[f'{hand}Ctrl_Z'].iloc[index]),2)
+
+        moved_distance = np.sqrt(x+y+z)
+        df.loc[index, name_column] = round(moved_distance,2)
+
+    total_distance = round(df[name_column].sum(),2)
+    return total_distance
+
+def calculate_hand_dinstance_speed_metrics(df: pd.DataFrame, hand: str) -> tuple:
     
+    column_name     = f'{hand}_hand_distance_speed'
+    df[column_name] = None
+    time_difference = None
+
+    for index in range(len(df)):
+
+        if index == 0:
+            df.loc[index, column_name] = 0
+            continue
+
+        time_difference = abs(df.loc[index, 'PhaseTime_s'] - df.loc[index-1, 'PhaseTime_s'])
+        
+        df.loc[index, column_name] = df.loc[index, f'{hand}_moved_distance'] / time_difference
+
+    mean_hand_speed = round(df[column_name].mean(),2)
+    max_hand_speed  = round(df[column_name].max(),2)
+
+    return mean_hand_speed, max_hand_speed
+
+def calculate_trigger_or_grip_hand_metrics(df: pd.DataFrame, hand: str, action: str) -> tuple:
+    """
+    Calculate metrics of hand Trigger or Grip (pressure mean and press count).
+    Args:
+        df(DataFrame): the trajectory file csv.
+        hand(str) : Left or Right.
+        action(str) : Trigger or Grip.
+    Returns:
+        tuple: pressure_mean, press_count
+    """
+
+    column_name = hand + action
+
+    pressure_mean = round(df[column_name].mean(), 2) 
+    press_count   = df[df[column_name]!= 0.0][column_name].size
+
+    return press_count, pressure_mean
 # Fill out dictionary function =========================================================

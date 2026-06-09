@@ -98,9 +98,6 @@
 |not_dominant_hand_grab_count||Grab|
 |dominant_hand_mean_grap_duration||Grab|
 |not_dominant_hand_mean_grap_duration||Grab|
-|hand_movement_symmetry|||
-|gaze_obj_looked_ratio|به هر هدفی||
-|gaze_switch_count||
 
 Number of column (for one phase) after feature extraction for both trajectory + events file =~ 60
 
