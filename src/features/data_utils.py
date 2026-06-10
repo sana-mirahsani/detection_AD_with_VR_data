@@ -596,15 +596,18 @@ def filling_obj_recognition_dict(df: pd.DataFrame, obj_recognition:dict) -> dict
         arr_choose_wrong_obj = np.append(arr_choose_wrong_obj, num_wrong_obj_chosen)
 
     # filling
-    obj_recognition["score"] = ratio_calculation(value1 = total_successful_round, value2 = round_num)
-    obj_recognition["mean_success_duration"]  = round(np.mean(arr_success_duration), 2)
-    obj_recognition["mean_choose_wrong_obj"]  = round(np.mean(arr_choose_wrong_obj), 2)
+    obj_recognition["obj_recognition_score"] = ratio_calculation(value1 = total_successful_round, value2 = round_num)
+    obj_recognition["obj_recognition_mean_success_duration"]  = round(np.mean(arr_success_duration), 2)
+    obj_recognition["obj_recognition_mean_choose_wrong_obj"]  = round(np.mean(arr_choose_wrong_obj), 2)
 
-    # extract
-    accuracy = df[(df['Section'] == 'Summary') & (df['EventType'] == 'GAME_COMPLETE')]['Activity_Log'].apply(extract_value_from_string, pattern_list = [r"Accuracy=([\d.]+)%"])
-
+    # extract 
+    game_start_time  = df[(df['Section'] == 'Initial') & (df['EventType'] == 'GAME_START')]['PhaseTime_s'].iloc[0]
+    game_finish_time = df[(df['Section'] == 'Summary') & (df['EventType'] == 'GAME_COMPLETE')]['PhaseTime_s'].iloc[0]
+    
+    total_duration = diff if (diff := game_finish_time - game_start_time) > 0 else sys.exit("game timer is not valid!!!")
+    
     # filling
-    obj_recognition["accuracy"] = accuracy.iloc[0]
+    obj_recognition["obj_recognition_total_duration"] = total_duration
 
     # check none values
     has_none = any(value is None for value in obj_recognition.values())
@@ -643,3 +646,50 @@ def filling_visuospatial_dict(df: pd.DataFrame, visuospatial_dict) -> dict:
         sys.exit("Stopping program")
 
     return visuospatial_dict
+
+def filling_memory_dict(df: pd.DataFrame, memory_dict) -> dict:
+    
+    # extract
+    string_activity_log   = df[(df['Section'] == 'Completion') & (df['EventType'] == 'MEMORY_COMPLETE')]['Activity_Log'].iloc[0]
+    num_correct_placement = extract_value_from_string(string_activity_log, pattern_list=[r"Correct=([0-9]+)"])
+    num_total_object      = extract_value_from_string(string_activity_log, pattern_list=[r"Total=([0-9]+)"])
+
+    # filling
+    memory_dict["memory_score"] = ratio_calculation(value1=float(num_correct_placement), value2=float(num_total_object))
+
+    # extract
+    string_activity_log =  df[df['EventType'] == 'RECALL_FIRST_ACTION']['Activity_Log'].iloc[0]
+
+    # filling
+    memory_dict["memory_delay_first_action"] = extract_value_from_string(string_activity_log, pattern_list=[r"DelayFromPhaseStart=([0-9]*\.?[0-9]+)"])
+
+    # filling
+    memory_dict["memory_total_wrong_recall"] = len(df[df['EventType'] == 'SOCKET_REJECTION'])
+
+    # fillling
+    memory_dict["memory_mean_recall"] = round(df[(df['EventType'] == 'MEMORY_RECALL')]['Duration_s'].mean(), 2)
+
+    # extract
+    string_activity_log = df[df['EventType'] == 'MEMORY_COMPLETE']['Activity_Log'].iloc[0]
+
+    # filling
+    memory_dict["memory_total_duration" ] = extract_value_from_string(string_activity_log, pattern_list=[r"RecallTime=([0-9]*\.?[0-9]+)"])
+
+    memory_dict["memory_cognitive_freez_count"] = len(df[df['EventType'] == 'COGNITIVE_FREEZE'])
+
+    # extract and clean
+    freeze_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=[r"FreezeDuration=([0-9]*\.?[0-9]+)"])
+    freeze_series = freeze_series.dropna()
+    freeze_series = freeze_series.astype(float)
+
+    # filling
+    memory_dict["memory_cognitive_freez_mean_duration"] = freeze_series.mean()
+
+    # check none values
+    has_none = any(value is None for value in memory_dict.values())
+
+    if has_none:
+        print('None value found in memory_dict!!!')
+        sys.exit("Stopping program")
+
+    return memory_dict
