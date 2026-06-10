@@ -364,6 +364,7 @@ def calculate_trigger_or_grip_hand_metrics(df: pd.DataFrame, hand: str, action: 
     return press_count, pressure_mean
 
 # Fill out dictionary function =========================================================
+# Events
 def filling_reading_time_dict(df: pd.DataFrame, reading_time_dict: dict, phase_duration: float) -> dict:
 
     # extracting
@@ -693,3 +694,41 @@ def filling_memory_dict(df: pd.DataFrame, memory_dict) -> dict:
         sys.exit("Stopping program")
 
     return memory_dict
+
+# Trajectory
+def filling_headset_dict(df: pd.DataFrame, headset_dict) -> dict:
+    # filling distance features
+    headset_dict['head_total_distance'] = calculate_total_head_distance(df)
+
+    headset_dict['HMD_X_std'] = round(df['HMD_X'].std(),2)
+    headset_dict['HMD_Y_std'] = round(df['HMD_Y'].std(),2)
+    headset_dict['HMD_Z_std'] = round(df['HMD_Z'].std(),2)
+
+    headset_dict['HMD_X_range'] = round(df['HMD_X'].max() - df['HMD_X'].min(),2)
+    headset_dict['HMD_Y_range'] = round(df['HMD_Y'].max() - df['HMD_Y'].min(),2)
+    headset_dict['HMD_Z_range'] = round(df['HMD_Z'].max() - df['HMD_Z'].min(),2)
+
+    headset_dict['mean_head_speed_in_distance'], headset_dict['max_head_speed_in_distance'], headset_dict['std_head_speed_in_distance'] = calculate_head_distance_speed_metrics(df)
+
+    # filling orientation features
+    headset_dict["head_total_orientation"] = calculate_total_head_orientation(df)
+    
+    headset_dict['Yaw_std']   = round(df['HMD_Yaw'].std(),2)
+    headset_dict['Pitch_std'] = round(df['HMD_Pitch'].std(),2)
+    headset_dict['Roll_std']  = round(df['HMD_Roll'].std(),2)
+
+    headset_dict['Yaw_range']   = round(df['HMD_Yaw'].max() - df['HMD_Yaw'].min(),2)
+    headset_dict['Pitch_range'] = round(df['HMD_Pitch'].max() - df['HMD_Pitch'].min(),2)
+    headset_dict['Roll_range']  = round(df['HMD_Roll'].max() - df['HMD_Roll'].min(),2)
+
+    headset_dict['mean_head_speed_in_orientation'], headset_dict['max_head_speed_in_orientation'], headset_dict['std_head_speed_in_orientation'] = calculate_head_orientation_speed_metrics(df)
+
+    # extract
+    not_none_GazeTarget = df['GazeTarget'].notna().sum()
+
+    # filling gaze features
+    headset_dict['gaze_obj_looked_ratio'] = ratio_calculation(not_none_GazeTarget,len(df))
+
+    headset_dict['gaze_switch_count'] = calculate_switch_count(df)
+
+    return headset_dict
