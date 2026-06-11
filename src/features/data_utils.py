@@ -42,8 +42,13 @@ def cleaning_csv_file(csv_path_to_read: str, csv_path_to_write: str) -> None:
     columns_line = lines[0]
     new_columns = columns_line.strip().split(",")
     lines.pop(0)  # remove the header line from the list of lines
+    
+    if (len(new_columns) != 10) and (len(new_columns) != 22):
+        # remove spaces
+        new_columns = [x for x in new_columns if x != ""]
 
-    if len(new_columns) == 10:
+    if len(new_columns) == 10: # add only for event files
+        
         new_columns.append("Activity_Log") # add a new column for the Activity Log
     
     # 2. remove section breaks line and merge the Activity Log
@@ -187,7 +192,7 @@ def calculate_decision_latency(first_hover_time: float, first_press_time: float)
     Returns:
         float: The decision latency in seconds, or None if the timestamps cannot be parsed.
     """
-    time_difference = first_press_time - first_hover_time
+    time_difference = round(first_press_time - first_hover_time, 2)
     return time_difference
 
 def calculate_total_head_distance(df: pd.DataFrame) -> float:
@@ -284,7 +289,8 @@ def calculate_head_orientation_speed_metrics(df: pd.DataFrame) -> tuple:
 
 def calculate_switch_count(df: pd.DataFrame) -> int:
 
-    if df['GazeTarget'].nunique() == 1:return 0
+    if (df['GazeTarget'].nunique() == 1) or (df['GazeTarget'].isna().all()):
+        return 0
 
     else:
         objs = list(df['GazeTarget'].dropna().unique())
@@ -559,9 +565,9 @@ def filling_obj_recognition_dict(df: pd.DataFrame, obj_recognition:dict) -> dict
     round_num = int(round_num.iloc[0])
 
     # extract and calculate for each round
-    for round in range(round_num):
+    for value in range(round_num):
         
-        round_name = f'Round{round+1}'
+        round_name = f'Round{value+1}'
 
         start_index = df[(df['Section'] == round_name) & (df['EventType'] == 'SECTION_START')].index
         end_index   = df[(df['Section'] == round_name) & (df['EventType'] == 'SECTION_END')].index
@@ -727,6 +733,7 @@ def filling_headset_dict(df: pd.DataFrame, headset_dict: dict) -> dict:
     has_none = any(value is None for value in headset_dict.values())
 
     if has_none:
+        print(headset_dict)
         gf.fail(msg='None value found in headset_dict!!!', error='ValueError')
 
     return headset_dict
@@ -763,3 +770,20 @@ def filling_controller_dict(df: pd.DataFrame, dominant_hand: str, not_dominant_h
         gf.fail(msg='None value found in controller_dict!!!', error='ValueError')
 
     return controller_dict
+
+def filling_patient_dict(df: pd.DataFrame, paitent_dict: dict, row_index: int)-> dict:
+
+    paitent_dict["Paitent_id"] = df.iloc[row_index]['PatientID']
+    paitent_dict["Age"]        = df.iloc[row_index]['Age']
+    paitent_dict["Gender"]     = df.iloc[row_index]['Gender']
+    paitent_dict["dominant_hand"]     = df.iloc[row_index]['dominant_hand']
+    paitent_dict["Sessions_Completed_out_of_4"] = df.iloc[row_index]['Sessions_Completed_out_of_4']
+    paitent_dict["Help_Rating_out_of_5"]        = df.iloc[row_index]['Help_Rating_out_of_5']
+
+    # check none values
+    has_none = any(value is None for value in paitent_dict.values())
+
+    if has_none:
+        gf.fail(msg='None value found in paitent_dict!!!', error='ValueError')
+
+    return paitent_dict
