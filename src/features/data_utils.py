@@ -3,6 +3,8 @@ import pandas as pd
 from datetime import datetime
 import numpy as np
 import sys
+sys.path.append('../') 
+from features import general_func as gf
 
 # Reading_Writing functions =========================================================
 # Find the paitent folder in the data folder
@@ -386,8 +388,7 @@ def filling_reading_time_dict(df: pd.DataFrame, reading_time_dict: dict, phase_d
     has_none = any(value is None for value in reading_time_dict.values())
 
     if has_none:
-        print('None value found in reading_time_dict!!!')
-        sys.exit("Stopping program")
+        gf.fail(msg='None value found in reading_time_dict!!!', error='ValueError')
 
     return reading_time_dict
 
@@ -421,8 +422,7 @@ def filling_hover_dict(df: pd.DataFrame, hover_dict: dict, phase_duration: float
     has_none = any(value is None for value in hover_dict.values())
 
     if has_none:
-        print('None value found in hover_dict!!!')
-        sys.exit("Stopping program")
+        gf.fail(msg='None value found in hover_dict!!!', error='ValueError')
 
     return hover_dict
 
@@ -450,8 +450,7 @@ def filling_press_dict(df: pd.DataFrame, press_dict: dict, phase_duration: float
     has_none = any(value is None for value in press_dict.values())
 
     if has_none:
-        print('None value found in press_dict!!!')
-        sys.exit("Stopping program")
+        gf.fail(msg='None value found in press_dict!!!', error='ValueError')
 
     return press_dict
 
@@ -474,8 +473,7 @@ def filling_grab_dict(df: pd.DataFrame, grab_dict: dict, phase_duration: float)-
     has_none = any(value is None for value in grab_dict.values())
 
     if has_none:
-        print('None value found in grab_dict!!!')
-        sys.exit("Stopping program")
+        gf.fail(msg='None value found in grab_dict!!!', error='ValueError')
 
     return grab_dict
 
@@ -503,8 +501,7 @@ def filling_gaze_dict(df: pd.DataFrame, gaze_dict: dict, phase_duration: float)-
     has_none = any(value is None for value in gaze_dict.values())
 
     if has_none:
-        print('None value found in gaze_dict!!!')
-        sys.exit("Stopping program")
+        gf.fail(msg='None value found in gaze_dict!!!', error='ValueError')
 
     return gaze_dict
 
@@ -526,8 +523,7 @@ def filling_behavior_dict(df: pd.DataFrame, behavior_dict: dict, hover_dict: dic
     has_none = any(value is None for value in behavior_dict.values())
 
     if has_none:
-        print('None value found in behavior_dict!!!')
-        sys.exit("Stopping program")
+        gf.fail(msg='None value found in behavior_dict!!!', error='ValueError')
 
     return behavior_dict
 
@@ -545,8 +541,7 @@ def filling_temporal_dict(df: pd.DataFrame, temporal_dict: dict) -> dict:
     has_none = any(value is None for value in temporal_dict.values())
 
     if has_none:
-        print('None value found in temporal_dict!!!')
-        sys.exit("Stopping program")
+        gf.fail(msg='None value found in temporal_dict!!!', error='ValueError')
 
     return temporal_dict
 
@@ -614,8 +609,7 @@ def filling_obj_recognition_dict(df: pd.DataFrame, obj_recognition:dict) -> dict
     has_none = any(value is None for value in obj_recognition.values())
 
     if has_none:
-        print('None value found in obj_recognition!!!')
-        sys.exit("Stopping program")
+        gf.fail(msg='None value found in obj_recognition!!!', error='ValueError')
 
     return obj_recognition
 
@@ -643,8 +637,7 @@ def filling_visuospatial_dict(df: pd.DataFrame, visuospatial_dict) -> dict:
     has_none = any(value is None for value in visuospatial_dict.values())
 
     if has_none:
-        print('None value found in visuospatial_dict!!!')
-        sys.exit("Stopping program")
+        gf.fail(msg='None value found in visuospatial_dict!!!', error='ValueError')
 
     return visuospatial_dict
 
@@ -690,13 +683,12 @@ def filling_memory_dict(df: pd.DataFrame, memory_dict) -> dict:
     has_none = any(value is None for value in memory_dict.values())
 
     if has_none:
-        print('None value found in memory_dict!!!')
-        sys.exit("Stopping program")
+        gf.fail(msg='None value found in memory_dict!!!', error='ValueError')
 
     return memory_dict
 
 # Trajectory
-def filling_headset_dict(df: pd.DataFrame, headset_dict) -> dict:
+def filling_headset_dict(df: pd.DataFrame, headset_dict: dict) -> dict:
     # filling distance features
     headset_dict['head_total_distance'] = calculate_total_head_distance(df)
 
@@ -731,4 +723,43 @@ def filling_headset_dict(df: pd.DataFrame, headset_dict) -> dict:
 
     headset_dict['gaze_switch_count'] = calculate_switch_count(df)
 
+    # check none values
+    has_none = any(value is None for value in headset_dict.values())
+
+    if has_none:
+        gf.fail(msg='None value found in headset_dict!!!', error='ValueError')
+
     return headset_dict
+
+def filling_controller_dict(df: pd.DataFrame, dominant_hand: str, not_dominant_hand:str , controller_dict: dict)-> dict:
+    
+    # filling distance features
+    controller_dict["dominant_hand_total_distance"]     = calculate_total_hand_distance(df,dominant_hand)
+    controller_dict["not_dominant_hand_total_distance"] = calculate_total_hand_distance(df,not_dominant_hand)
+
+    controller_dict["dominant_hand_mean_speed"], controller_dict["dominant_hand_max_speed"]         = calculate_hand_dinstance_speed_metrics(df, dominant_hand)
+    controller_dict["not_dominant_hand_mean_speed"], controller_dict["not_dominant_hand_max_speed"] = calculate_hand_dinstance_speed_metrics(df, not_dominant_hand)
+
+    controller_dict['dominant_hand_x_range']     = round(df[f'{dominant_hand}Ctrl_X'].max() - df[f'{dominant_hand}Ctrl_X'].min(),2)
+    controller_dict['dominant_hand_y_range']     = round(df[f'{dominant_hand}Ctrl_Y'].max() - df[f'{dominant_hand}Ctrl_Y'].min(),2)
+    controller_dict['dominant_hand_z_range']     = round(df[f'{dominant_hand}Ctrl_Z'].max() - df[f'{dominant_hand}Ctrl_Z'].min(),2)
+
+    controller_dict['not_dominant_hand_x_range'] = round(df[f'{not_dominant_hand}Ctrl_X'].max() - df[f'{not_dominant_hand}Ctrl_X'].min(),2)
+    controller_dict['not_dominant_hand_y_range'] = round(df[f'{not_dominant_hand}Ctrl_Y'].max() - df[f'{not_dominant_hand}Ctrl_Y'].min(),2)
+    controller_dict['not_dominant_hand_z_range'] = round(df[f'{not_dominant_hand}Ctrl_Z'].max() - df[f'{not_dominant_hand}Ctrl_Z'].min(),2)
+
+    # filling trigger features
+    controller_dict["dominant_hand_trigger_press_count"], controller_dict["dominant_hand_trigger_pressure_mean"]         = calculate_trigger_or_grip_hand_metrics(df, dominant_hand, 'Trigger')
+    controller_dict["not_dominant_hand_trigger_press_count"], controller_dict["not_dominant_hand_trigger_pressure_mean"] = calculate_trigger_or_grip_hand_metrics(df, not_dominant_hand, 'Trigger')
+
+    # filling grip features
+    controller_dict["dominant_hand_grip_count"], controller_dict["dominant_hand_grip_mean"] = calculate_trigger_or_grip_hand_metrics(df, dominant_hand, 'Grip')
+    controller_dict["not_dominant_hand_grip_count"], controller_dict["not_dominant_hand_grip_mean"]= calculate_trigger_or_grip_hand_metrics(df, not_dominant_hand, 'Grip')
+
+    # check none values
+    has_none = any(value is None for value in controller_dict.values())
+
+    if has_none:
+        gf.fail(msg='None value found in controller_dict!!!', error='ValueError')
+
+    return controller_dict

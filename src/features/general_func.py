@@ -28,3 +28,15 @@ def fail(msg: str, error:str ) -> None:
             raise NotImplementedError(msg)
         case _:
             sys.exit("Unkown Error!!!")
+
+def general_dict_check(input_dict: dict, input_dict_name: str, correct_keys: list):
+    
+    # check the general type
+    if not isinstance(input_dict, dict):
+        fail("Input is not a Dictionary!!!", "TypeError")
+    
+    # check the keys
+    """missing = correct_keys - input_dict.keys()
+    if missing:
+        fail(f"Missing keys: {missing}", "ValueError")"""
+    
