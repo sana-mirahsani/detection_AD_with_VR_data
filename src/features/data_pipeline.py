@@ -2,12 +2,22 @@ from features import data_utils
 from pathlib import Path
 import pandas as pd
 import sys
+
 sys.path.append('../') 
 from features import data_utils as du
+from features import general_func as gf
 
+# piple for cleaning functions
 def pipeline_cleaning(list_patient_id: list,
                       patients_data_folder: str) -> None:
-    
+    """
+    cleaning process, removing Section Break rows and add Activity Log column as the last row.
+    Args: 
+        list_patient_id(List): All ids of patients as a list.
+        patients_data_folder(str): Path of data folder.
+    Returns:
+        None: check the directory, must see a new folder called clean_data.
+    """
     print("Starting the data cleaning pipeline...")
 
     for patient_id in list_patient_id:
@@ -41,77 +51,103 @@ def pipeline_cleaning(list_patient_id: list,
         print("Cleaning OK, next patient...")
     print("Cleaning process completed.")
 
-def creating_feature_vector_section_default(section_default_df: pd.DataFrame,
-                                            hover_dict: dict,
-                                            press_dict: dict,
-                                            reading_time_dict: dict,
-                                            behavior_dict: dict,
-                                            temporal_dict: dict) -> pd.DataFrame: 
-
-    features_dict = {
-        "section_id": None,
-        "section_name": None,
-        "section_total_time": None,
-    }
+# Pipeline for creating feature vectors
+def creating_event_dictionary(df: pd.DataFrame, phase_name: str, empty_dictionaries:list, extra_features_empty_dictionaries:list, phase_duration:float) -> dict:
+    """
+    Filling all eventy features (basics and extra features for other phases)
+    Args: 
+        df(Dataframe): trajectory csv
+        phase_name(str): Tutorial or ObjectRecognition or Visuospatial or Memory.
+        empty_dictionaries(list): list of basic dictionaries (empty at first).
+        extra_features_dictionaries(List): list of 3 extra feature dictionary (empty at first).
+        phase_dict(dict): dictionary of phase (for each 4 phases and not empty!).
+    Returns:
+        concated all basic dictionaries (also with extra features depends on phase name) as the event dict.
+    """
+    # filling read_time dict
+    reading_time_dict = du.filling_reading_time_dict(df, empty_dictionaries[0], phase_duration)
     
-    # extract section duration
-    section_total_time = du.extract_section_duration(section_default_df)
+    # filling hover_dict
+    hover_dict = du.filling_hover_dict(df, empty_dictionaries[1], phase_duration)
 
-    # fill out hover_dict
-    hover_dict = du.fill_hover_dict_Default_section(section_default_df, hover_dict, section_total_time)
+    # filling press_dict
+    press_dict = du.filling_press_dict(df, empty_dictionaries[2], phase_duration)
+
+    # filling grab_dict
+    grab_dict = du.filling_grab_dict(df, empty_dictionaries[3], phase_duration)
+
+    # filling gaze_dict
+    gaze_dict = du.filling_gaze_dict(df, empty_dictionaries[4], phase_duration)
+
+    # filling behavior_dict
+    behavior_dict = du.filling_behavior_dict(df, empty_dictionaries[5], hover_dict, press_dict, reading_time_dict, phase_duration)
+
+    # filling temporal_dict
+    temporal_dict = du.filling_temporal_dict(df, empty_dictionaries[6])
+
+    # concate all dictionaries
+    event_dictionary = reading_time_dict | hover_dict | press_dict | grab_dict | gaze_dict | behavior_dict | temporal_dict
+
+    # check for extra features
+    match phase_name:
+
+        case 'Tutorial':
+            return event_dictionary
+        
+        case 'ObjectRecognition':
+
+            obj_recognition_dict = extra_features_empty_dictionaries[0]
+
+            # fill and add extra features to basic dict
+            obj_recognition_dict = du.filling_obj_recognition_dict(df, obj_recognition_dict)
+            event_dictionary.update(obj_recognition_dict)
+
+            return event_dictionary
+        
+        case 'Visuospatial':
+            
+            visuospatial_dict = extra_features_empty_dictionaries[1]
+
+            # fill and add extra features to basic dict
+            visuospatial_dict = du.filling_visuospatial_dict(df, visuospatial_dict)
+            event_dictionary.update(visuospatial_dict)
+            
+            return event_dictionary
+        
+        case 'Memory':
+
+            memory_dict = extra_features_empty_dictionaries[2]
+
+            # fill and add extra features to basic dict
+            memory_dict = du.filling_memory_dict(df, memory_dict)
+            event_dictionary.update(memory_dict)
+            
+            return event_dictionary
+        
+        case _ :
+            gf.fail(msg="not valid value for test_name!!!", error="ValueError")
+
+def creating_trajectory_dictionary(df: pd.DataFrame, dominant_hand: str, not_dominant_hand: str, empty_dictionaries:list) -> dict:
+    """
+    Filling all trajectory features (headset and controller)
+    Args: 
+        df(Dataframe): trajectory csv
+        dominant_hand(str): dominant hand of patient.
+        not_dominant_hand(str): dominant hand of patient.
+        empty_dictionaries(List): headset and controler dictionary but empty.
+    Returns:
+        concated headset_dict and controler_dict as the trajectory dict.
+    """
+    # fill headset dictionary
+    headset_dict = du.filling_headset_dict(df, empty_dictionaries[0])
+
+    # fill controler dictionary
+    controler_dict = du.filling_controller_dict(df, dominant_hand, not_dominant_hand, empty_dictionaries[0])
+
+    # concate all dictionaries
+    trajectory_dictionary = headset_dict | controler_dict
+
+    # check dict
+    gf.general_dict_check(trajectory_dictionary, "trajectory_dictionary", None)
     
-    # fill out press_dict
-    # press count (assumed that for each button pressed, there is a button released too
-    filtered_df_button_pressed = du.filter_by_string_contains(section_default_df, 'EventType', 'BUTTON_PRESSED')
-    total_press_count = len(filtered_df_button_pressed)  # Assuming each press has a corresponding release
-    press_dict["total_press_count"] = total_press_count
-
-    # press duration
-    filtered_df = du.filter_by_string_contains(section_default_df, 'Activity_Log', 'PressDuration')
-    press_duration_series = du.extract_metric_from_section(filtered_df, du.extract_press_duration)
-
-    press_dict["total_press_duration"], press_dict["mean_press_duration"], press_dict["max_press_duration"], press_dict["median_press_duration"], press_dict["std_press_duration"] = du.calculate_metric_stats(press_duration_series, is_counting=False)
-
-    # press_intensity
-    press_dict["press_intensity"] = du.ratio_calculation(press_dict["total_press_duration"], section_total_time)
-
-    # fill out reading_time_dict
-    # reading time duration
-    filtered_df = du.filter_by_string_contains(section_default_df, 'Activity_Log', 'ReadingTime')
-    reading_time_series = du.extract_metric_from_section(filtered_df, du.extract_reading_time_duration)
-
-    # calculation for reading time duration
-    reading_time_dict["total_reading_time_duration"], reading_time_dict["mean_reading_time_duration"], reading_time_dict["max_reading_time_duration"], reading_time_dict["median_reading_time_duration"], reading_time_dict["std_reading_time_duration"] = du.calculate_metric_stats(reading_time_series, is_counting=False)
-
-    # reading time intensity
-    reading_time_dict["reading_time_intensity"] = du.ratio_calculation(reading_time_dict["total_reading_time_duration"], section_total_time)
-
-    # fill out behavior_dict
-    behavior_dict["hover_vs_active_interaction_ratio"] = du.ratio_calculation(hover_dict["total_hover_duration"], press_dict["total_press_duration"])
-    behavior_dict["hover_vs_reading_time_ratio"] = du.ratio_calculation(hover_dict["total_hover_duration"], reading_time_dict["total_reading_time_duration"])
-
-    behavior_dict["interaction_fraction"] = du.ratio_calculation(hover_dict["total_hover_duration"] + press_dict["total_press_duration"], section_total_time)
-
-    behavior_dict["decision_latency"] = du.calculate_decision_latency(first_hover_time=du.extract_first_time_hover(section_default_df), first_press_time=du.extract_first_time_press(section_default_df))
-
-    behavior_dict["clicks_per_second"] = du.ratio_calculation(press_dict["total_press_count"], section_total_time)
-    behavior_dict["hovers_per_click"] = du.ratio_calculation(hover_dict["total_hover_count"], press_dict["total_press_count"])
-
-    # fill out temproal_dict
-    temporal_dict['time_before_first_press'] = du.extract_first_time_press(section_default_df)
-    temporal_dict['time_before_first_hover'] = du.extract_first_time_hover(section_default_df)
-
-    # create dataframe
-    features_dict["section_id"] = 1
-    features_dict["section_name"] = 'Default'
-    features_dict["section_total_time"] = section_total_time
-
-    features_dict.update(hover_dict)
-    features_dict.update(press_dict)
-    features_dict.update(reading_time_dict)
-    features_dict.update(behavior_dict)
-    features_dict.update(temporal_dict)
-
-    return pd.DataFrame([features_dict])
-
-def creating_feature_vector_tutorial_events():pass
+    return trajectory_dictionary

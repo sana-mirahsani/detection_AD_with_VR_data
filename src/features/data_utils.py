@@ -7,8 +7,15 @@ sys.path.append('../')
 from features import general_func as gf
 
 # Reading_Writing functions =========================================================
-# Find the paitent folder in the data folder
 def find_patient_folder(patients_data_folder: str, patient_id: str) -> dir:
+    """
+    Find the paitent folder in the data folder
+    Args:       
+        patients_data_folder(str): folder of patients data.
+        patient_id(str): ids of patients.
+    Returns:        
+        list: list of all csv files;
+    """
     prefix = patient_id + "_"
 
     matching_dirs = [
@@ -20,9 +27,15 @@ def find_patient_folder(patients_data_folder: str, patient_id: str) -> dir:
 
     return current_patient_data_folder
 
-# Find the csv file in the folder
+
 def find_csv_file(folder_path: str) -> list:
-    
+    """
+    Find the csv file in the folder
+    Args:       
+        folder_path (str): path of folder of all csv files.
+    Returns:        
+        list: list of all csv files;
+    """
     csv_files = [
         file.name
         for file in folder_path.glob("*.csv")
@@ -31,9 +44,16 @@ def find_csv_file(folder_path: str) -> list:
     return csv_files
 
 # Cleaning functions =========================================================
-# Cleaning the csv file by removing the section breaks and merging the activity log into a single column
 def cleaning_csv_file(csv_path_to_read: str, csv_path_to_write: str) -> None:
-    
+    """
+    Cleaning the csv file by removing the section breaks 
+    and merging the activity log into a single column.
+    Args:       
+        csv_path_to_read (str): path of uncleaned CSV file.
+        csv_path_to_write(str): path to save the csv after cleaning.
+    Returns:        
+        None
+    """
     with open(csv_path_to_read, "r", encoding="utf-8") as f:
         # 0. read all lines from the file
         lines = f.readlines()
@@ -72,7 +92,14 @@ def cleaning_csv_file(csv_path_to_read: str, csv_path_to_write: str) -> None:
     return save_df(df, csv_path_to_write)
     
 def cleaning_line(line: str, num_columns : int) -> list:
-
+    """
+    Cleaning lines that are messy.
+    Args:       
+        line (str): A line of csv file.
+        num_columns(int): number of correct column.
+    Returns:        
+        list : cleaned line.
+    """
     messy_row = line.strip().split(",")
 
     if num_columns == 11:
@@ -81,7 +108,15 @@ def cleaning_line(line: str, num_columns : int) -> list:
     
     return messy_row
 
-def save_df(df, csv_path):
+def save_df(df: pd.DataFrame, csv_path: str):
+    """
+    save df to a specific path.
+    Args:       
+        df (pd.DataFrame): A DataFrame of one phase.
+        csv_path(str): Path of csv.
+    Returns:        
+        tuple : return True or False with the Error
+    """
     try:
         df.to_csv(csv_path, index=False)
         return True, None
@@ -222,6 +257,13 @@ def calculate_total_head_distance(df: pd.DataFrame) -> float:
     return total_distance
 
 def calculate_head_distance_speed_metrics(df: pd.DataFrame) -> tuple:
+    """
+    Calculate metrics of head speed in distance by the coordinate of the three axis.
+    Args:
+        df(DataFrame): the trajectory file csv.
+    Returns:
+        tuple: mean_head_speed, max_head_speed, std_head_speed.
+    """
     df['head_distance_speed'] = None
     time_difference = None
 
@@ -268,7 +310,13 @@ def calculate_total_head_orientation(df: pd.DataFrame) -> float:
     return total_orientation
 
 def calculate_head_orientation_speed_metrics(df: pd.DataFrame) -> tuple:
-    
+    """
+    Calculate metrcis of head speed in orientation.
+    Args:
+        df(DataFrame): the trajectory file csv.
+    Returns:
+        int: mean_head_speed, max_head_speed, std_head_speed
+    """
     df['head_orientation_speed'] = None
     time_difference = None
 
@@ -288,7 +336,13 @@ def calculate_head_orientation_speed_metrics(df: pd.DataFrame) -> tuple:
     return mean_head_speed, max_head_speed, std_head_speed
 
 def calculate_switch_count(df: pd.DataFrame) -> int:
-
+    """
+    Calculate number of switching.
+    Args:
+        df(DataFrame): the trajectory file csv.
+    Returns:
+        int: switch_count
+    """
     if (df['GazeTarget'].nunique() == 1) or (df['GazeTarget'].isna().all()):
         return 0
 
@@ -333,7 +387,15 @@ def calculate_total_hand_distance(df: pd.DataFrame, hand: str) -> float:
     return total_distance
 
 def calculate_hand_dinstance_speed_metrics(df: pd.DataFrame, hand: str) -> tuple:
-    
+    """
+    Calculate metrics of hand speed in distance (pressure mean and press count).
+    Args:
+        df(DataFrame): the trajectory file csv.
+        hand(str) : Left or Right.
+    Returns:
+        tuple: mean_hand_speed, max_hand_speed
+    """
+
     column_name     = f'{hand}_hand_distance_speed'
     df[column_name] = None
     time_difference = None
@@ -374,7 +436,15 @@ def calculate_trigger_or_grip_hand_metrics(df: pd.DataFrame, hand: str, action: 
 # Fill out dictionary function =========================================================
 # Events
 def filling_reading_time_dict(df: pd.DataFrame, reading_time_dict: dict, phase_duration: float) -> dict:
-
+    """
+    Filling reading_time_dict from df.
+    Args:
+        df(DataFrame): the event file csv.
+        reading_time_dict(dict) : reading_time_dict(empty).
+        phase_duration(float) : Total phase duration.
+    Returns:
+        dict: reading_time_dict(filled).
+    """
     # extracting
     reading_time_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=[r"ReadingTime=([0-9]*\.?[0-9]+)"])
 
@@ -399,7 +469,15 @@ def filling_reading_time_dict(df: pd.DataFrame, reading_time_dict: dict, phase_d
     return reading_time_dict
 
 def filling_hover_dict(df: pd.DataFrame, hover_dict: dict, phase_duration: float)-> dict:
-    
+    """
+    Filling hover_dict from df.
+    Args:
+        df(DataFrame): the event file csv.
+        hover_dict(dict) : hover_dict(empty).
+        phase_duration(float) : Total phase duration.
+    Returns:
+        dict: hover_dict(filled).
+    """
     patterns = [r"HoverCount=([0-9]+)", 
                 r"TotalHovers=([0-9]+)"]
 
@@ -433,7 +511,15 @@ def filling_hover_dict(df: pd.DataFrame, hover_dict: dict, phase_duration: float
     return hover_dict
 
 def filling_press_dict(df: pd.DataFrame, press_dict: dict, phase_duration: float)-> dict:
-
+    """
+    Filling press_dict from df.
+    Args:
+        df(DataFrame): the event file csv.
+        press_dict(dict) : press_dict(empty).
+        phase_duration(float) : Total phase duration.
+    Returns:
+        dict: press_dict(filled).
+    """
     # extract
     press_df = df[df['EventType'].isin(['BUTTON_PRESSED','BUTTON_CLICKED'])]
 
@@ -461,7 +547,15 @@ def filling_press_dict(df: pd.DataFrame, press_dict: dict, phase_duration: float
     return press_dict
 
 def filling_grab_dict(df: pd.DataFrame, grab_dict: dict, phase_duration: float)-> dict:
-
+    """
+    Filling grab_dict from df.
+    Args:
+        df(DataFrame): the event file csv.
+        grab_dict(dict) : grab_dict(empty).
+        phase_duration(float) : Total phase duration.
+    Returns:
+        dict: grab_dict(filled).
+    """
     # extract
     grab_df = df[df['EventType'].isin(['GRAB_RELEASE','GRAB_PRACTICE_PLACEMENT'])]
 
@@ -484,7 +578,15 @@ def filling_grab_dict(df: pd.DataFrame, grab_dict: dict, phase_duration: float)-
     return grab_dict
 
 def filling_gaze_dict(df: pd.DataFrame, gaze_dict: dict, phase_duration: float)-> dict:
-
+    """
+    Filling gaze_dict from df.
+    Args:
+        df(DataFrame): the event file csv.
+        gaze_dict(dict) : gaze_dict(empty).
+        phase_duration(float) : Total phase duration.
+    Returns:
+        dict: gaze_dict(filled).
+    """
     # extract
     gaze_df = df[df['EventType'].isin(['GAZE_END'])]
     
@@ -512,7 +614,18 @@ def filling_gaze_dict(df: pd.DataFrame, gaze_dict: dict, phase_duration: float)-
     return gaze_dict
 
 def filling_behavior_dict(df: pd.DataFrame, behavior_dict: dict, hover_dict: dict, press_dict: dict, reading_time_dict: dict, phase_duration: float)-> dict:
-    
+    """
+    Filling behavior_dict from df.
+    Args:
+        df(DataFrame): the event file csv.
+        behavior_dict(dict) : behavior_dict(empty).
+        hover_dict(dict) : Filled from before.
+        press_dict(dict) : Filled from before.
+        reading_time_dict(dict) : Filled from before.
+        phase_duration(float) : Total phase duration.
+    Returns:
+        dict: behavior_dict(filled).
+    """
     # extract
     first_hover_time = extract_event_first_time(df, ['BUTTON_HOVER_START'])
     first_press_time = extract_event_first_time(df, ['BUTTON_PRESSED','BUTTON_CLICKED'])
@@ -534,7 +647,14 @@ def filling_behavior_dict(df: pd.DataFrame, behavior_dict: dict, hover_dict: dic
     return behavior_dict
 
 def filling_temporal_dict(df: pd.DataFrame, temporal_dict: dict) -> dict:
-
+    """
+    Filling temporal_dict from df.
+    Args:
+        df(DataFrame): the event file csv.
+        temporal_dict(dict) : temporal_dict(empty).
+    Returns:
+        dict: temporal_dict(filled).
+    """
     # extract
     first_hover_time = extract_event_first_time(df, ['BUTTON_HOVER_START'])
     first_press_time = extract_event_first_time(df, ['BUTTON_PRESSED','BUTTON_CLICKED'])
@@ -552,7 +672,14 @@ def filling_temporal_dict(df: pd.DataFrame, temporal_dict: dict) -> dict:
     return temporal_dict
 
 def filling_obj_recognition_dict(df: pd.DataFrame, obj_recognition:dict) -> dict:
-
+    """
+    Filling obj_recognition from df.
+    Args:
+        df(DataFrame): the event file csv (only obj_recognition csv).
+        obj_recognition_dict(dict) : obj_recognition_dict(empty).
+    Returns:
+        dict: obj_recognition_dict(filled).
+    """
     # initial
     total_successful_round = 0
     arr_success_duration   = np.array([])
@@ -620,7 +747,14 @@ def filling_obj_recognition_dict(df: pd.DataFrame, obj_recognition:dict) -> dict
     return obj_recognition
 
 def filling_visuospatial_dict(df: pd.DataFrame, visuospatial_dict) -> dict:
-
+    """
+    Filling visuospatial from df.
+    Args:
+        df(DataFrame): the event file csv (only visuospatial csv).
+        visuospatial_dict(dict) : visuospatial_dict(empty).
+    Returns:
+        dict: visuospatial_dict(filled).
+    """
     # extracting
     string_activity_log = df[(df['Section'] == 'Completion') & (df['EventType'] == 'VISUOSPATIAL_COMPLETE')]['Activity_Log'].iloc[0]
     total_time_string = extract_value_from_string(string_activity_log, pattern_list=[r"Time=([0-9]*\.?[0-9]+)"])
@@ -648,7 +782,14 @@ def filling_visuospatial_dict(df: pd.DataFrame, visuospatial_dict) -> dict:
     return visuospatial_dict
 
 def filling_memory_dict(df: pd.DataFrame, memory_dict) -> dict:
-    
+    """
+    Filling memory from df.
+    Args:
+        df(DataFrame): the event file csv (only memory csv).
+        memory_dict(dict) : memory_dict(empty).
+    Returns:
+        dict: memory_dict(filled).
+    """
     # extract
     string_activity_log   = df[(df['Section'] == 'Completion') & (df['EventType'] == 'MEMORY_COMPLETE')]['Activity_Log'].iloc[0]
     num_correct_placement = extract_value_from_string(string_activity_log, pattern_list=[r"Correct=([0-9]+)"])
@@ -695,6 +836,14 @@ def filling_memory_dict(df: pd.DataFrame, memory_dict) -> dict:
 
 # Trajectory
 def filling_headset_dict(df: pd.DataFrame, headset_dict: dict) -> dict:
+    """
+    Filling headset_dict from df.
+    Args:
+        df(DataFrame): the trajectory file csv.
+        headset_dict(dict) : headset_dict(empty).
+    Returns:
+        dict: headset_dict(filled).
+    """
     # filling distance features
     headset_dict['head_total_distance'] = calculate_total_head_distance(df)
 
@@ -739,7 +888,14 @@ def filling_headset_dict(df: pd.DataFrame, headset_dict: dict) -> dict:
     return headset_dict
 
 def filling_controller_dict(df: pd.DataFrame, dominant_hand: str, not_dominant_hand:str , controller_dict: dict)-> dict:
-    
+    """
+    Filling controller_dict from df.
+    Args:
+        df(DataFrame): the trajectory file csv.
+        controller_dict(dict) : controller_dict(empty).
+    Returns:
+        dict: controller_dict(filled).
+    """
     # filling distance features
     controller_dict["dominant_hand_total_distance"]     = calculate_total_hand_distance(df,dominant_hand)
     controller_dict["not_dominant_hand_total_distance"] = calculate_total_hand_distance(df,not_dominant_hand)
@@ -771,8 +927,16 @@ def filling_controller_dict(df: pd.DataFrame, dominant_hand: str, not_dominant_h
 
     return controller_dict
 
+# Patients infos
 def filling_patient_dict(df: pd.DataFrame, paitent_dict: dict, row_index: int)-> dict:
-
+    """
+    Filling patient_dict from df.
+    Args:
+        df(DataFrame): the patients_data_log.json (converted to df).
+        paitent_dict(dict) : paitent_dict(empty).
+    Returns:
+        dict: paitent_dict(filled).
+    """
     paitent_dict["Paitent_id"] = df.iloc[row_index]['PatientID']
     paitent_dict["Age"]        = df.iloc[row_index]['Age']
     paitent_dict["Gender"]     = df.iloc[row_index]['Gender']
