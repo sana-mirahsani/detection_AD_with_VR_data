@@ -174,3 +174,10 @@ memory_dict = {
             }
 
 phase_name_list = ['Tutorial', 'ObjectRecognition', 'Visuospatial', 'Memory']
+
+clean_csv_file_correct_order = [
+    '01_Tutorial_events.csv', '01_Tutorial_trajectory.csv',
+    '02_ObjectRecognition_events.csv', '02_ObjectRecognition_trajectory.csv',
+    '03_Visuospatial_events.csv', '03_Visuospatial_trajectory.csv',
+    '04_Memory_events.csv', '04_Memory_trajectory.csv'
+    ]

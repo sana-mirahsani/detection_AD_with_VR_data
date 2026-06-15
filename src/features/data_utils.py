@@ -3,8 +3,15 @@ import pandas as pd
 from datetime import datetime
 import numpy as np
 import sys
+import importlib
 sys.path.append('../') 
 from features import general_func as gf
+import constants_data as cd
+
+importlib.reload(gf)
+importlib.reload(cd)
+
+clean_csv_file_correct_order = cd.clean_csv_file_correct_order
 
 # Reading_Writing functions =========================================================
 def find_patient_folder(patients_data_folder: str, patient_id: str) -> dir:
@@ -123,6 +130,13 @@ def save_df(df: pd.DataFrame, csv_path: str):
     except Exception as e:
         return False, str(e)
 
+def get_order(item):
+    """
+    """
+    for i, ref in enumerate(clean_csv_file_correct_order):
+        if ref in item:
+            return i
+    gf.fail(msg="Unmactched files csv!!!", error="ValueError") 
 # Extraction functions =========================================================
 def extract_value_from_string(s:str, pattern_list:list) -> str | None:
     """
