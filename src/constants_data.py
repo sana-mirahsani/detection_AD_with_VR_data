@@ -149,28 +149,28 @@ controller_dict = {
 
 # extra features only for ObjectRecognition
 obj_recognition_dict = {
-                "obj_recognition_score": None,
-                "obj_recognition_mean_success_duration" : None,
-                "obj_recognition_mean_choose_wrong_obj": None,
-                "obj_recognition_total_duration": None
+                "ObjectRecognition_score": None,
+                "ObjectRecognition_mean_success_duration" : None,
+                "ObjectRecognition_mean_choose_wrong_obj": None,
+                "ObjectRecognition_total_duration": None
             }
 
 # extra features only for Visuospatial
 visuospatial_dict = {
-                "visuospatial_score": None,
-                "visuospatial_total_wrong_placement": None,
-                "visuospatial_total_duration" : None
+                "Visuospatial_score": None,
+                "Visuospatial_total_wrong_placement": None,
+                "Visuospatial_total_duration" : None
                 }
 
 # extra features only for memory_dict
 memory_dict = {
-                "memory_score": None,
-                "memory_delay_first_action": None,
-                "memory_total_wrong_recall" : None,
-                "memory_mean_recall": None,
-                "memory_cognitive_freez_count": None,
-                "memory_cognitive_freez_mean_duration": None,
-                "memory_total_duration" : None
+                "Memory_score": None,
+                "Memory_delay_first_action": None,
+                "Memory_total_wrong_recall" : None,
+                "Memory_mean_recall": None,
+                "Memory_cognitive_freez_count": None,
+                "Memory_cognitive_freez_mean_duration": None,
+                "Memory_total_duration" : None
             }
 
 phase_name_list = ['Tutorial', 'ObjectRecognition', 'Visuospatial', 'Memory']

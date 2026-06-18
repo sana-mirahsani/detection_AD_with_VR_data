@@ -471,13 +471,15 @@ def filling_reading_time_dict(df: pd.DataFrame, reading_time_dict: dict, phase_d
 
     reading_time_dict['intensity_reading_time'] = ratio_calculation(
                                                     value1=reading_time_dict['total_reading_time'],
+                   
                                                     value2=phase_duration
                                                     )
 
     # check none values
-    has_none = any(value is None for value in reading_time_dict.values())
+    missing_keys = [k for k, v in reading_time_dict.items() if pd.isna(v)]
 
-    if has_none:
+    if len(missing_keys) > 0:
+        print(missing_keys)
         gf.fail(msg='None value found in reading_time_dict!!!', error='ValueError')
 
     return reading_time_dict
@@ -511,15 +513,16 @@ def filling_hover_dict(df: pd.DataFrame, hover_dict: dict, phase_duration: float
     hover_series = hover_series.astype(float)
 
     # filling
-    hover_dict['total_duration_hover'], hover_dict['max_duration_hover'], hover_dict['mean_duration_hover'], hover_dict['median_duration_hover'], hover_dict['std_duration_hover'] = calculate_duration_metric_stats(metric_series=hover_series)
+    hover_dict['total_duration_hover'], hover_dict['mean_duration_hover'], hover_dict['max_duration_hover'], hover_dict['median_duration_hover'], hover_dict['std_duration_hover'] = calculate_duration_metric_stats(metric_series=hover_series)
 
     # filling
     hover_dict['intensity_hover'] = round(hover_dict['total_duration_hover']/phase_duration,2)
 
     # check none values
-    has_none = any(value is None for value in hover_dict.values())
+    missing_keys = [k for k, v in hover_dict.items() if pd.isna(v)]
 
-    if has_none:
+    if len(missing_keys) > 0:
+        print(missing_keys)
         gf.fail(msg='None value found in hover_dict!!!', error='ValueError')
 
     return hover_dict
@@ -545,17 +548,18 @@ def filling_press_dict(df: pd.DataFrame, press_dict: dict, phase_duration: float
     press_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=patterns)
     press_series = press_series.dropna()
     press_series = press_series.astype(float)
-
+    
     # filling
-    press_dict['total_duration_press'], press_dict['max_duration_press'], press_dict['mean_duration_press'], press_dict['median_duration_press'], press_dict['std_duration_press'] = calculate_duration_metric_stats(metric_series=press_series)
+    press_dict['total_duration_press'], press_dict['mean_duration_press'], press_dict['max_duration_press'], press_dict['median_duration_press'], press_dict['std_duration_press'] = calculate_duration_metric_stats(metric_series=press_series)
 
     # filling
     press_dict['intensity_press'] = round(press_dict['total_duration_press']/phase_duration,2)
 
     # check none values
-    has_none = any(value is None for value in press_dict.values())
+    missing_keys = [k for k, v in press_dict.items() if pd.isna(v)]
 
-    if has_none:
+    if len(missing_keys) > 0:
+        print(missing_keys)
         gf.fail(msg='None value found in press_dict!!!', error='ValueError')
 
     return press_dict
@@ -574,19 +578,20 @@ def filling_grab_dict(df: pd.DataFrame, grab_dict: dict, phase_duration: float)-
     grab_df = df[df['EventType'].isin(['GRAB_RELEASE','GRAB_PRACTICE_PLACEMENT'])]
 
     # filling
-    grab_dict['total_count_grab']=len(grab_df)
+    grab_dict['total_count_grab']= len(grab_df)
     
     # extract
     grab_series = df[df['EventType'].isin(['GRAB_RELEASE'])]['Duration_s']
 
     # filling
-    grab_dict['total_duration_grab'], grab_dict['max_duration_grab'], grab_dict['mean_duration_grab'], grab_dict['median_duration_grab'], grab_dict['std_duration_grab'] = calculate_duration_metric_stats(metric_series=grab_series)
+    grab_dict['total_duration_grab'], grab_dict['mean_duration_grab'], grab_dict['max_duration_grab'], grab_dict['median_duration_grab'], grab_dict['std_duration_grab'] = calculate_duration_metric_stats(metric_series=grab_series)
     grab_dict['intensity_grab'] = round(grab_dict['total_duration_grab']/phase_duration,2)
 
     # check none values
-    has_none = any(value is None for value in grab_dict.values())
+    missing_keys = [k for k, v in grab_dict.items() if pd.isna(v)]
 
-    if has_none:
+    if len(missing_keys) > 0 :
+        print(missing_keys)
         gf.fail(msg='None value found in grab_dict!!!', error='ValueError')
 
     return grab_dict
@@ -614,15 +619,16 @@ def filling_gaze_dict(df: pd.DataFrame, gaze_dict: dict, phase_duration: float)-
     gaze_series = gaze_series.astype(float)
 
     # filling
-    gaze_dict['total_duration_gaze'], gaze_dict['max_duration_gaze'], gaze_dict['mean_duration_gaze'], gaze_dict['median_duration_gaze'], gaze_dict['std_duration_gaze'] = calculate_duration_metric_stats(metric_series=gaze_series)
+    gaze_dict['total_duration_gaze'], gaze_dict['mean_duration_gaze'], gaze_dict['max_duration_gaze'], gaze_dict['median_duration_gaze'], gaze_dict['std_duration_gaze'] = calculate_duration_metric_stats(metric_series=gaze_series)
 
     # filling
     gaze_dict['intensity_gaze'] = round(gaze_dict['total_duration_gaze']/phase_duration,2)
 
     # check none values
-    has_none = any(value is None for value in gaze_dict.values())
+    missing_keys = [k for k, v in gaze_dict.items() if pd.isna(v)]
 
-    if has_none:
+    if len(missing_keys) > 0:
+        print(missing_keys)
         gf.fail(msg='None value found in gaze_dict!!!', error='ValueError')
 
     return gaze_dict
@@ -653,9 +659,10 @@ def filling_behavior_dict(df: pd.DataFrame, behavior_dict: dict, hover_dict: dic
     behavior_dict["hovers_per_click"]                  = ratio_calculation(hover_dict["total_count_hover"], press_dict["total_count_press"])
 
     # check none values
-    has_none = any(value is None for value in behavior_dict.values())
+    missing_keys = [k for k, v in behavior_dict.items() if pd.isna(v)]
 
-    if has_none:
+    if len(missing_keys) > 0:
+        print(missing_keys)
         gf.fail(msg='None value found in behavior_dict!!!', error='ValueError')
 
     return behavior_dict
@@ -678,9 +685,10 @@ def filling_temporal_dict(df: pd.DataFrame, temporal_dict: dict) -> dict:
     temporal_dict['time_before_first_hover'] = first_hover_time
 
     # check none values
-    has_none = any(value is None for value in temporal_dict.values())
+    missing_keys = [k for k, v in temporal_dict.items() if pd.isna(v)]
 
-    if has_none:
+    if len(missing_keys) > 0:
+        print(missing_keys)
         gf.fail(msg='None value found in temporal_dict!!!', error='ValueError')
 
     return temporal_dict
@@ -739,9 +747,9 @@ def filling_obj_recognition_dict(df: pd.DataFrame, obj_recognition:dict) -> dict
         arr_choose_wrong_obj = np.append(arr_choose_wrong_obj, num_wrong_obj_chosen)
 
     # filling
-    obj_recognition["obj_recognition_score"] = ratio_calculation(value1 = total_successful_round, value2 = round_num)
-    obj_recognition["obj_recognition_mean_success_duration"]  = round(np.mean(arr_success_duration), 2)
-    obj_recognition["obj_recognition_mean_choose_wrong_obj"]  = round(np.mean(arr_choose_wrong_obj), 2)
+    obj_recognition["ObjectRecognition_score"] = ratio_calculation(value1 = total_successful_round, value2 = round_num)
+    obj_recognition["ObjectRecognition_mean_success_duration"]  = round(np.mean(arr_success_duration), 2)
+    obj_recognition["ObjectRecognition_mean_choose_wrong_obj"]  = round(np.mean(arr_choose_wrong_obj), 2)
 
     # extract 
     game_start_time  = df[(df['Section'] == 'Initial') & (df['EventType'] == 'GAME_START')]['PhaseTime_s'].iloc[0]
@@ -750,12 +758,13 @@ def filling_obj_recognition_dict(df: pd.DataFrame, obj_recognition:dict) -> dict
     total_duration = diff if (diff := game_finish_time - game_start_time) > 0 else sys.exit("game timer is not valid!!!")
     
     # filling
-    obj_recognition["obj_recognition_total_duration"] = total_duration
+    obj_recognition["ObjectRecognition_total_duration"] = total_duration
 
     # check none values
-    has_none = any(value is None for value in obj_recognition.values())
+    missing_keys = [k for k, v in obj_recognition.items() if pd.isna(v)]
 
-    if has_none:
+    if len(missing_keys) > 0:
+        print(missing_keys)
         gf.fail(msg='None value found in obj_recognition!!!', error='ValueError')
 
     return obj_recognition
@@ -774,7 +783,7 @@ def filling_visuospatial_dict(df: pd.DataFrame, visuospatial_dict) -> dict:
     total_time_string = extract_value_from_string(string_activity_log, pattern_list=[r"Time=([0-9]*\.?[0-9]+)"])
 
     # filling
-    visuospatial_dict["visuospatial_total_duration"] = float(total_time_string)
+    visuospatial_dict["Visuospatial_total_duration"] = float(total_time_string)
 
     # extracting
     string_activity_log   = df[(df['Section'] == 'Completion') & (df['EventType'] == 'VISUOSPATIAL_COMPLETE')]['Activity_Log'].iloc[0]
@@ -782,15 +791,16 @@ def filling_visuospatial_dict(df: pd.DataFrame, visuospatial_dict) -> dict:
     num_total_object      = extract_value_from_string(string_activity_log, pattern_list=[r"Total=([0-9]+)"])
 
     # filling
-    visuospatial_dict["visuospatial_score"] = ratio_calculation(value1=float(num_correct_placement), value2=float(num_total_object))
+    visuospatial_dict["Visuospatial_score"] = ratio_calculation(value1=float(num_correct_placement), value2=float(num_total_object))
 
     # filling
-    visuospatial_dict["visuospatial_total_wrong_placement"] = (df['EventType'] == "SOCKET_REJECTION").sum()
+    visuospatial_dict["Visuospatial_total_wrong_placement"] = (df['EventType'] == "SOCKET_REJECTION").sum()
 
     # check none values
-    has_none = any(value is None for value in visuospatial_dict.values())
+    missing_keys = [k for k, v in visuospatial_dict.items() if pd.isna(v)]
 
-    if has_none:
+    if len(missing_keys) > 0:
+        print(missing_keys)
         gf.fail(msg='None value found in visuospatial_dict!!!', error='ValueError')
 
     return visuospatial_dict
@@ -810,27 +820,27 @@ def filling_memory_dict(df: pd.DataFrame, memory_dict) -> dict:
     num_total_object      = extract_value_from_string(string_activity_log, pattern_list=[r"Total=([0-9]+)"])
 
     # filling
-    memory_dict["memory_score"] = ratio_calculation(value1=float(num_correct_placement), value2=float(num_total_object))
+    memory_dict["Memory_score"] = ratio_calculation(value1=float(num_correct_placement), value2=float(num_total_object))
 
     # extract
     string_activity_log =  df[df['EventType'] == 'RECALL_FIRST_ACTION']['Activity_Log'].iloc[0]
 
     # filling
-    memory_dict["memory_delay_first_action"] = extract_value_from_string(string_activity_log, pattern_list=[r"DelayFromPhaseStart=([0-9]*\.?[0-9]+)"])
+    memory_dict["Memory_delay_first_action"] = extract_value_from_string(string_activity_log, pattern_list=[r"DelayFromPhaseStart=([0-9]*\.?[0-9]+)"])
 
     # filling
-    memory_dict["memory_total_wrong_recall"] = len(df[df['EventType'] == 'SOCKET_REJECTION'])
+    memory_dict["Memory_total_wrong_recall"] = len(df[df['EventType'] == 'SOCKET_REJECTION'])
 
     # fillling
-    memory_dict["memory_mean_recall"] = round(df[(df['EventType'] == 'MEMORY_RECALL')]['Duration_s'].mean(), 2)
+    memory_dict["Memory_mean_recall"] = round(df[(df['EventType'] == 'MEMORY_RECALL')]['Duration_s'].mean(), 2)
 
     # extract
     string_activity_log = df[df['EventType'] == 'MEMORY_COMPLETE']['Activity_Log'].iloc[0]
 
     # filling
-    memory_dict["memory_total_duration" ] = extract_value_from_string(string_activity_log, pattern_list=[r"RecallTime=([0-9]*\.?[0-9]+)"])
+    memory_dict["Memory_total_duration" ] = extract_value_from_string(string_activity_log, pattern_list=[r"RecallTime=([0-9]*\.?[0-9]+)"])
 
-    memory_dict["memory_cognitive_freez_count"] = len(df[df['EventType'] == 'COGNITIVE_FREEZE'])
+    memory_dict["Memory_cognitive_freez_count"] = len(df[df['EventType'] == 'COGNITIVE_FREEZE'])
 
     # extract and clean
     freeze_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=[r"FreezeDuration=([0-9]*\.?[0-9]+)"])
@@ -838,12 +848,14 @@ def filling_memory_dict(df: pd.DataFrame, memory_dict) -> dict:
     freeze_series = freeze_series.astype(float)
 
     # filling
-    memory_dict["memory_cognitive_freez_mean_duration"] = freeze_series.mean()
-
+    memory_dict["Memory_cognitive_freez_mean_duration"] = freeze_series.mean()
+    print(freeze_series)
+    print(memory_dict["Memory_cognitive_freez_mean_duration"])
     # check none values
-    has_none = any(value is None for value in memory_dict.values())
+    missing_keys = [k for k, v in memory_dict.items() if pd.isna(v)]
 
-    if has_none:
+    if len(missing_keys) > 0:
+        print(missing_keys)
         gf.fail(msg='None value found in memory_dict!!!', error='ValueError')
 
     return memory_dict
@@ -893,10 +905,10 @@ def filling_headset_dict(df: pd.DataFrame, headset_dict: dict) -> dict:
     headset_dict['gaze_switch_count'] = calculate_switch_count(df)
 
     # check none values
-    has_none = any(value is None for value in headset_dict.values())
+    missing_keys = [k for k, v in headset_dict.items() if pd.isna(v)]
 
-    if has_none:
-        print(headset_dict)
+    if len(missing_keys) > 0:
+        print(missing_keys)
         gf.fail(msg='None value found in headset_dict!!!', error='ValueError')
 
     return headset_dict
@@ -934,9 +946,10 @@ def filling_controller_dict(df: pd.DataFrame, dominant_hand: str, not_dominant_h
     controller_dict["not_dominant_hand_grip_count"], controller_dict["not_dominant_hand_grip_mean"]= calculate_trigger_or_grip_hand_metrics(df, not_dominant_hand, 'Grip')
 
     # check none values
-    has_none = any(value is None for value in controller_dict.values())
+    missing_keys = [k for k, v in controller_dict.items() if pd.isna(v)]
 
-    if has_none:
+    if len(missing_keys) > 0:
+        print(missing_keys)
         gf.fail(msg='None value found in controller_dict!!!', error='ValueError')
 
     return controller_dict
@@ -959,9 +972,10 @@ def filling_patient_dict(df: pd.DataFrame, paitent_dict: dict, row_index: int)->
     paitent_dict["Help_Rating_out_of_5"]        = df.iloc[row_index]['Help_Rating_out_of_5']
 
     # check none values
-    has_none = any(value is None for value in paitent_dict.values())
+    missing_keys = [k for k, v in paitent_dict.items() if pd.isna(v)]
 
-    if has_none:
+    if len(missing_keys) > 0:
+        print(missing_keys)
         gf.fail(msg='None value found in paitent_dict!!!', error='ValueError')
 
     return paitent_dict
