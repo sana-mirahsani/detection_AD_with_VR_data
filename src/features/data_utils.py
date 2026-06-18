@@ -789,7 +789,7 @@ def filling_obj_recognition_dict(df: pd.DataFrame, obj_recognition:dict) -> dict
 
     if len(missing_keys) > 0:
         print(missing_keys)
-        gf.fail(msg='None value found in obj_recognition!!!', error='ValueError')
+        print('some events in ObjectRecognition did not happen:')
 
     return obj_recognition
 
@@ -825,7 +825,7 @@ def filling_visuospatial_dict(df: pd.DataFrame, visuospatial_dict) -> dict:
 
     if len(missing_keys) > 0:
         print(missing_keys)
-        gf.fail(msg='None value found in visuospatial_dict!!!', error='ValueError')
+        print('some events in visuospatial did not happen:')
 
     return visuospatial_dict
 
@@ -873,14 +873,13 @@ def filling_memory_dict(df: pd.DataFrame, memory_dict) -> dict:
 
     # filling
     memory_dict["Memory_cognitive_freez_mean_duration"] = freeze_series.mean()
-    print(freeze_series)
-    print(memory_dict["Memory_cognitive_freez_mean_duration"])
+    
     # check none values
     missing_keys = [k for k, v in memory_dict.items() if pd.isna(v)]
 
     if len(missing_keys) > 0:
+        print('some events in memory did not happen:')
         print(missing_keys)
-        gf.fail(msg='None value found in memory_dict!!!', error='ValueError')
 
     return memory_dict
 
