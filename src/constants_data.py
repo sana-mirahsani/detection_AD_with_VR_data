@@ -1,176 +1,182 @@
+import numpy as np
 # empty dictionaries
 patient_dict = {
-    "Paitent_id"    : None,
-    "Age"           : None,
-    "Gender"        : None,
-    "dominant_hand" : None,
-    "Sessions_Completed_out_of_4" : None, 
-    "Help_Rating_out_of_5" : None
+    "Paitent_id"    : np.nan,
+    "Age"           : np.nan,
+    "Gender"        : np.nan,
+    "dominant_hand" : np.nan,
+    "Sessions_Completed_out_of_4" : np.nan, 
+    "Help_Rating_out_of_5" : np.nan
 }
 
 # statistical features
 reading_time_dict = {
-    "total_reading_time": None,
-    "mean_reading_time": None,
-    "max_reading_time": None,
-    "median_reading_time": None,
-    "std_reading_time": None,
-    "intensity_reading_time" : None
+    "reading_time_happened" : np.nan,
+    "total_reading_time": np.nan,
+    "mean_reading_time": np.nan,
+    "max_reading_time": np.nan,
+    "median_reading_time": np.nan,
+    "std_reading_time": np.nan,
+    "intensity_reading_time" : np.nan
 }
 
 hover_dict = {
-    "total_count_hover": None,
-    "total_duration_hover": None,
-    "mean_duration_hover": None,
-    "max_duration_hover": None,
-    "median_duration_hover": None,
-    "std_duration_hover": None,
-    "intensity_hover": None
+    "hover_happened" : np.nan,
+    "total_count_hover": np.nan,
+    "total_duration_hover": np.nan,
+    "mean_duration_hover": np.nan,
+    "max_duration_hover": np.nan,
+    "median_duration_hover": np.nan,
+    "std_duration_hover": np.nan,
+    "intensity_hover": np.nan
 }
 
 press_dict = {
-    "total_count_press": None,
-    "total_duration_press": None,
-    "mean_duration_press": None,
-    "max_duration_press": None,
-    "median_duration_press": None,
-    "std_duration_press": None,
-    "intensity_press": None # Interaction intensity
+    "press_happened" : np.nan,
+    "total_count_press": np.nan,
+    "total_duration_press": np.nan,
+    "mean_duration_press": np.nan,
+    "max_duration_press": np.nan,
+    "median_duration_press": np.nan,
+    "std_duration_press": np.nan,
+    "intensity_press": np.nan # Interaction intensity
 }
 
 grab_dict = {
-    "total_count_grab": None,
-    "total_duration_grab": None,
-    "mean_duration_grab": None,
-    "max_duration_grab": None,
-    "median_duration_grab": None,
-    "std_duration_grab": None,
-    "intensity_grab": None # Interaction intensity
+    "grab_happened" : np.nan,
+    "total_count_grab": np.nan,
+    "total_duration_grab": np.nan,
+    "mean_duration_grab": np.nan,
+    "max_duration_grab": np.nan,
+    "median_duration_grab": np.nan,
+    "std_duration_grab": np.nan,
+    "intensity_grab": np.nan # Interaction intensity
 }
 
 gaze_dict = {
-    "total_count_gaze": None,
-    "total_duration_gaze": None,
-    "mean_duration_gaze": None,
-    "max_duration_gaze": None,
-    "median_duration_gaze": None,
-    "std_duration_gaze": None,
-    "intensity_gaze": None # Interaction intensity
+    "gaze_happened" : np.nan,
+    "total_count_gaze": np.nan,
+    "total_duration_gaze": np.nan,
+    "mean_duration_gaze": np.nan,
+    "max_duration_gaze": np.nan,
+    "median_duration_gaze": np.nan,
+    "std_duration_gaze": np.nan,
+    "intensity_gaze": np.nan # Interaction intensity
 }
 
 # Behavioral features
 behavior_dict = {
-    "hover_vs_reading_time_ratio": None,
-    "hover_vs_active_interaction_ratio": None,
-    "interaction_fraction": None,
-    "decision_latency": None,  
-    "clicks_per_second": None,
-    "hovers_per_click": None
+    "hover_vs_reading_time_ratio": np.nan,
+    "hover_vs_active_interaction_ratio": np.nan,
+    "interaction_fraction": np.nan,
+    "decision_latency": np.nan,  
+    "clicks_per_second": np.nan,
+    "hovers_per_click": np.nan
 }
 
 # Temporal Features
 temporal_dict = {
-    "time_before_first_press": None,
-    "time_before_first_hover": None
+    "time_before_first_press": np.nan,
+    "time_before_first_hover": np.nan
 }
 
 # Head features
 headset_dict = {
     # Position features
-    "head_total_distance": None,
+    "head_total_distance": np.nan,
 
-    "HMD_X_std": None,
-    "HMD_Y_std": None,
-    "HMD_Z_std": None,
+    "HMD_X_std": np.nan,
+    "HMD_Y_std": np.nan,
+    "HMD_Z_std": np.nan,
 
-    "HMD_X_range": None,
-    "HMD_Y_range": None,
-    "HMD_Z_range": None,
+    "HMD_X_range": np.nan,
+    "HMD_Y_range": np.nan,
+    "HMD_Z_range": np.nan,
 
     # Speed features in ditance
-    "mean_head_speed_in_distance": None,
-    "max_head_speed_in_distance": None,
-    "std_head_speed_in_distance": None,
+    "mean_head_speed_in_distance": np.nan,
+    "max_head_speed_in_distance": np.nan,
+    "std_head_speed_in_distance": np.nan,
 
     # Orientation features
-    "head_total_orientation" : None,
+    "head_total_orientation" : np.nan,
 
-    "Yaw_std": None,
-    "Pitch_std": None,
-    "Roll_std": None,
+    "Yaw_std": np.nan,
+    "Pitch_std": np.nan,
+    "Roll_std": np.nan,
 
-    "Yaw_range": None,
-    "Pitch_range": None,
-    "Roll_range": None,
+    "Yaw_range": np.nan,
+    "Pitch_range": np.nan,
+    "Roll_range": np.nan,
 
     # Speed features in Orientation
-    "mean_head_speed_in_orientation": None,
-    "max_head_speed_in_orientation": None,
-    "std_head_speed_in_orientation": None,
+    "mean_head_speed_in_orientation": np.nan,
+    "max_head_speed_in_orientation": np.nan,
+    "std_head_speed_in_orientation": np.nan,
 
     # Gaze features
-    "gaze_obj_looked_ratio": None,
-    "gaze_switch_count": None
+    "gaze_obj_looked_ratio": np.nan,
+    "gaze_switch_count": np.nan
 
 }
 
 # Hand features
 controller_dict = {
     # Distance features
-    "dominant_hand_total_distance": None,
-    "not_dominant_hand_total_distance": None,
+    "dominant_hand_total_distance": np.nan,
+    "not_dominant_hand_total_distance": np.nan,
 
     # Speed features
-    "dominant_hand_mean_speed": None,
-    "not_dominant_hand_mean_speed": None,
-    "dominant_hand_max_speed": None,
-    "not_dominant_hand_max_speed": None,
+    "dominant_hand_mean_speed": np.nan,
+    "not_dominant_hand_mean_speed": np.nan,
+    "dominant_hand_max_speed": np.nan,
+    "not_dominant_hand_max_speed": np.nan,
 
     # Workspace_volume features
-    "dominant_hand_x_range": None,
-    "dominant_hand_y_range": None,
-    "dominant_hand_z_range": None,
-    "not_dominant_hand_x_range": None,
-    "not_dominant_hand_y_range": None,
-    "not_dominant_hand_z_range": None,
+    "dominant_hand_x_range": np.nan,
+    "dominant_hand_y_range": np.nan,
+    "dominant_hand_z_range": np.nan,
+    "not_dominant_hand_x_range": np.nan,
+    "not_dominant_hand_y_range": np.nan,
+    "not_dominant_hand_z_range": np.nan,
 
     # Press features
-    "dominant_hand_trigger_press_count": None,
-    "not_dominant_hand_trigger_press_count": None,
-    "dominant_hand_trigger_pressure_mean": None,
-    "not_dominant_hand_trigger_pressure_mean": None,
+    "dominant_hand_trigger_press_count": np.nan,
+    "not_dominant_hand_trigger_press_count": np.nan,
+    "dominant_hand_trigger_pressure_mean": np.nan,
+    "not_dominant_hand_trigger_pressure_mean": np.nan,
 
     # Grip count features
-    "dominant_hand_grip_count": None,
-    "not_dominant_hand_grip_count": None,
-    "dominant_hand_grip_mean": None,
-    "not_dominant_hand_grip_mean": None,
+    "dominant_hand_grip_count": np.nan,
+    "not_dominant_hand_grip_count": np.nan,
+    "dominant_hand_grip_mean": np.nan,
+    "not_dominant_hand_grip_mean": np.nan,
 }
 
 # extra features only for ObjectRecognition
 obj_recognition_dict = {
-                "ObjectRecognition_score": None,
-                "ObjectRecognition_mean_success_duration" : None,
-                "ObjectRecognition_mean_choose_wrong_obj": None,
-                "ObjectRecognition_total_duration": None
+                "ObjectRecognition_score": np.nan,
+                "ObjectRecognition_mean_success_duration" : np.nan,
+                "ObjectRecognition_mean_choose_wrong_obj": np.nan,
+                "ObjectRecognition_total_duration": np.nan
             }
 
 # extra features only for Visuospatial
 visuospatial_dict = {
-                "Visuospatial_score": None,
-                "Visuospatial_total_wrong_placement": None,
-                "Visuospatial_total_duration" : None
+                "Visuospatial_score": np.nan,
+                "Visuospatial_total_wrong_placement": np.nan,
+                "Visuospatial_total_duration" : np.nan
                 }
 
 # extra features only for memory_dict
 memory_dict = {
-                "Memory_score": None,
-                "Memory_delay_first_action": None,
-                "Memory_total_wrong_recall" : None,
-                "Memory_mean_recall": None,
-                "Memory_cognitive_freez_count": None,
-                "Memory_cognitive_freez_mean_duration": None,
-                "Memory_total_duration" : None
+                "Memory_score": np.nan,
+                "Memory_delay_first_action": np.nan,
+                "Memory_total_wrong_recall" : np.nan,
+                "Memory_mean_recall": np.nan,
+                "Memory_cognitive_freez_count": np.nan,
+                "Memory_cognitive_freez_mean_duration": np.nan,
+                "Memory_total_duration" : np.nan
             }
 
 phase_name_list = ['Tutorial', 'ObjectRecognition', 'Visuospatial', 'Memory']

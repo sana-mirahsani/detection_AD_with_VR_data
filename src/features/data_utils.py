@@ -466,22 +466,26 @@ def filling_reading_time_dict(df: pd.DataFrame, reading_time_dict: dict, phase_d
     reading_time_series = reading_time_series.dropna()
     reading_time_series = reading_time_series.astype(float)
 
-    # filling dict
-    reading_time_dict['total_reading_time'], reading_time_dict['mean_reading_time'], reading_time_dict['max_reading_time'], reading_time_dict['median_reading_time'], reading_time_dict['std_reading_time']= calculate_duration_metric_stats(metric_series=reading_time_series)
+    # check if the series exists
+    reading_time_dict["reading_time_happened"] = int(len(reading_time_series) > 0)
 
-    reading_time_dict['intensity_reading_time'] = ratio_calculation(
-                                                    value1=reading_time_dict['total_reading_time'],
-                   
-                                                    value2=phase_duration
-                                                    )
+    # filling dict 
+    if reading_time_dict["reading_time_happened"] == 1: # event happened
+        reading_time_dict['total_reading_time'], \
+        reading_time_dict['mean_reading_time'], \
+        reading_time_dict['max_reading_time'], \
+        reading_time_dict['median_reading_time'], \
+        reading_time_dict['std_reading_time'] = calculate_duration_metric_stats(metric_series=reading_time_series)
+        
+        reading_time_dict['intensity_reading_time'] = ratio_calculation(value1=reading_time_dict['total_reading_time'],value2=phase_duration)
 
     # check none values
     missing_keys = [k for k, v in reading_time_dict.items() if pd.isna(v)]
 
     if len(missing_keys) > 0:
+        print(f'None values found in reading_time dict :')
         print(missing_keys)
-        gf.fail(msg='None value found in reading_time_dict!!!', error='ValueError')
-
+        
     return reading_time_dict
 
 def filling_hover_dict(df: pd.DataFrame, hover_dict: dict, phase_duration: float)-> dict:
@@ -502,29 +506,37 @@ def filling_hover_dict(df: pd.DataFrame, hover_dict: dict, phase_duration: float
     hover_series = hover_series.dropna()
     hover_series = hover_series.astype(float)
 
-    # filling
-    hover_dict['total_count_hover'] = int(calculate_counting_metric_stats(metric_series=hover_series))
-
-    patterns = [r"HoverDuration=([0-9]*\.?[0-9]+)"]
-
-    # extracting and cleaning
-    hover_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=patterns)
-    hover_series = hover_series.dropna()
-    hover_series = hover_series.astype(float)
+    # check if the series exists
+    hover_dict["hover_happened"] = int(len(hover_series) > 0)
 
     # filling
-    hover_dict['total_duration_hover'], hover_dict['mean_duration_hover'], hover_dict['max_duration_hover'], hover_dict['median_duration_hover'], hover_dict['std_duration_hover'] = calculate_duration_metric_stats(metric_series=hover_series)
+    if hover_dict["hover_happened"] == 1: # event happened
 
-    # filling
-    hover_dict['intensity_hover'] = round(hover_dict['total_duration_hover']/phase_duration,2)
+        hover_dict['total_count_hover'] = int(calculate_counting_metric_stats(metric_series=hover_series))
+    
+        # extracting and cleaning
+        patterns = [r"HoverDuration=([0-9]*\.?[0-9]+)"]
+        hover_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=patterns)
+        hover_series = hover_series.dropna()
+        hover_series = hover_series.astype(float)
+
+        # filling
+        hover_dict['total_duration_hover'], \
+        hover_dict['mean_duration_hover'], \
+        hover_dict['max_duration_hover'], \
+        hover_dict['median_duration_hover'], \
+        hover_dict['std_duration_hover'] = calculate_duration_metric_stats(metric_series=hover_series)
+
+        # filling
+        hover_dict['intensity_hover'] = round(hover_dict['total_duration_hover']/phase_duration,2)
 
     # check none values
     missing_keys = [k for k, v in hover_dict.items() if pd.isna(v)]
 
     if len(missing_keys) > 0:
+        print(f'None values found in hover dict :')
         print(missing_keys)
-        gf.fail(msg='None value found in hover_dict!!!', error='ValueError')
-
+        
     return hover_dict
 
 def filling_press_dict(df: pd.DataFrame, press_dict: dict, phase_duration: float)-> dict:
@@ -540,28 +552,32 @@ def filling_press_dict(df: pd.DataFrame, press_dict: dict, phase_duration: float
     # extract
     press_df = df[df['EventType'].isin(['BUTTON_PRESSED','BUTTON_CLICKED'])]
 
-    # filling
-    press_dict['total_count_press']=len(press_df)
+    # check if the series exists
+    press_dict["press_happened"] = int(len(press_df) > 0)
 
-    # extract and cleaning
-    patterns = [r"PressDuration=([0-9]*\.?[0-9]+)"]
-    press_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=patterns)
-    press_series = press_series.dropna()
-    press_series = press_series.astype(float)
+    # filling
+    if press_dict["press_happened"] == 1: # event happened
+        press_dict['total_count_press']=len(press_df)
+
+        # extract and cleaning
+        patterns = [r"PressDuration=([0-9]*\.?[0-9]+)"]
+        press_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=patterns)
+        press_series = press_series.dropna()
+        press_series = press_series.astype(float)
     
-    # filling
-    press_dict['total_duration_press'], press_dict['mean_duration_press'], press_dict['max_duration_press'], press_dict['median_duration_press'], press_dict['std_duration_press'] = calculate_duration_metric_stats(metric_series=press_series)
+        # filling
+        press_dict['total_duration_press'], press_dict['mean_duration_press'], press_dict['max_duration_press'], press_dict['median_duration_press'], press_dict['std_duration_press'] = calculate_duration_metric_stats(metric_series=press_series)
 
-    # filling
-    press_dict['intensity_press'] = round(press_dict['total_duration_press']/phase_duration,2)
+        # filling
+        press_dict['intensity_press'] = round(press_dict['total_duration_press']/phase_duration,2)
 
     # check none values
     missing_keys = [k for k, v in press_dict.items() if pd.isna(v)]
 
     if len(missing_keys) > 0:
+        print(f'None values found in press dict :')
         print(missing_keys)
-        gf.fail(msg='None value found in press_dict!!!', error='ValueError')
-
+        
     return press_dict
 
 def filling_grab_dict(df: pd.DataFrame, grab_dict: dict, phase_duration: float)-> dict:
@@ -577,23 +593,27 @@ def filling_grab_dict(df: pd.DataFrame, grab_dict: dict, phase_duration: float)-
     # extract
     grab_df = df[df['EventType'].isin(['GRAB_RELEASE','GRAB_PRACTICE_PLACEMENT'])]
 
-    # filling
-    grab_dict['total_count_grab']= len(grab_df)
-    
-    # extract
-    grab_series = df[df['EventType'].isin(['GRAB_RELEASE'])]['Duration_s']
+    # check if the series exists
+    grab_dict["grab_happened"] = int(len(grab_df) > 0)
 
     # filling
-    grab_dict['total_duration_grab'], grab_dict['mean_duration_grab'], grab_dict['max_duration_grab'], grab_dict['median_duration_grab'], grab_dict['std_duration_grab'] = calculate_duration_metric_stats(metric_series=grab_series)
-    grab_dict['intensity_grab'] = round(grab_dict['total_duration_grab']/phase_duration,2)
+    if grab_dict["grab_happened"] == 1: # event happened
+        grab_dict['total_count_grab']= len(grab_df)
+    
+        # extract
+        grab_series = df[df['EventType'].isin(['GRAB_RELEASE'])]['Duration_s']
+
+        # filling
+        grab_dict['total_duration_grab'], grab_dict['mean_duration_grab'], grab_dict['max_duration_grab'], grab_dict['median_duration_grab'], grab_dict['std_duration_grab'] = calculate_duration_metric_stats(metric_series=grab_series)
+        grab_dict['intensity_grab'] = round(grab_dict['total_duration_grab']/phase_duration,2)
 
     # check none values
     missing_keys = [k for k, v in grab_dict.items() if pd.isna(v)]
 
     if len(missing_keys) > 0 :
+        print(f'None values found in grab dict :')
         print(missing_keys)
-        gf.fail(msg='None value found in grab_dict!!!', error='ValueError')
-
+        
     return grab_dict
 
 def filling_gaze_dict(df: pd.DataFrame, gaze_dict: dict, phase_duration: float)-> dict:
@@ -609,28 +629,32 @@ def filling_gaze_dict(df: pd.DataFrame, gaze_dict: dict, phase_duration: float)-
     # extract
     gaze_df = df[df['EventType'].isin(['GAZE_END'])]
     
-    # filling
-    gaze_dict['total_count_gaze'] = len(gaze_df)
-
-    # extract and cleaning
-    patterns = [r"DwellTime=([0-9]*\.?[0-9]+)"]
-    gaze_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=patterns)
-    gaze_series = gaze_series.dropna()
-    gaze_series = gaze_series.astype(float)
+    # check if the series exists
+    gaze_dict["gaze_happened"] = int(len(gaze_df) > 0)
 
     # filling
-    gaze_dict['total_duration_gaze'], gaze_dict['mean_duration_gaze'], gaze_dict['max_duration_gaze'], gaze_dict['median_duration_gaze'], gaze_dict['std_duration_gaze'] = calculate_duration_metric_stats(metric_series=gaze_series)
+    if gaze_dict["gaze_happened"] == 1: # event happened
+        gaze_dict['total_count_gaze'] = len(gaze_df)
 
-    # filling
-    gaze_dict['intensity_gaze'] = round(gaze_dict['total_duration_gaze']/phase_duration,2)
+        # extract and cleaning
+        patterns = [r"DwellTime=([0-9]*\.?[0-9]+)"]
+        gaze_series = df['Activity_Log'].apply(extract_value_from_string,pattern_list=patterns)
+        gaze_series = gaze_series.dropna()
+        gaze_series = gaze_series.astype(float)
+
+        # filling
+        gaze_dict['total_duration_gaze'], gaze_dict['mean_duration_gaze'], gaze_dict['max_duration_gaze'], gaze_dict['median_duration_gaze'], gaze_dict['std_duration_gaze'] = calculate_duration_metric_stats(metric_series=gaze_series)
+
+        # filling
+        gaze_dict['intensity_gaze'] = round(gaze_dict['total_duration_gaze']/phase_duration,2)
 
     # check none values
     missing_keys = [k for k, v in gaze_dict.items() if pd.isna(v)]
 
     if len(missing_keys) > 0:
+        print(f'None values found in gaze dict :')
         print(missing_keys)
-        gf.fail(msg='None value found in gaze_dict!!!', error='ValueError')
-
+        
     return gaze_dict
 
 def filling_behavior_dict(df: pd.DataFrame, behavior_dict: dict, hover_dict: dict, press_dict: dict, reading_time_dict: dict, phase_duration: float)-> dict:
