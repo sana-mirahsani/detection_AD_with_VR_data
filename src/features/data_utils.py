@@ -1020,6 +1020,28 @@ def create_dict_for_Nan_values(df: pd.DataFrame) -> dict:
 
     return col_with_Nan_values
 
+def find_median_for_numerical_col(df: pd.DataFrame, numerical_column : str):
+    """
+    Find the median of a numerical columns.
+    Args : 
+        df(pd.DataFrame): original dataframe.
+        numerical_column: A numerical column with Nan values.
+    Returns :   
+        median: Float or int.
+    """
+    return df[numerical_column].median()
+
+def find_most_frequent_for_categorical_col(df: pd.DataFrame, categorical_column: str):
+    """
+    Find the most frequent of a categorical columns.
+    Args : 
+        df(pd.DataFrame): original dataframe.
+        categorical_column: A categorical column with Nan values.
+    Returns :   
+        most frequent: string.
+    """
+    return df[categorical_column].mode()[0]
+
 def treat_missing_values(df: pd.DataFrame, missing_values : dict, threshold: float)-> pd.DataFrame:
     """
     Decide function for missing values.
@@ -1038,9 +1060,68 @@ def treat_missing_values(df: pd.DataFrame, missing_values : dict, threshold: flo
         if num_missing > (threshold * len(df)):
             df = df.drop(columns=[key])
 
-        # case 2: if less than threshold, fill column by median
+        # case 2: if less than threshold, fill column by median or most frequent 
         else : 
-            median_value = df[key].median()
-            df[key] = df[key].fillna(median_value)
+            if not pd.api.types.is_numeric_dtype(df[key]): # categorical
+                # fill with most frequent
+                most_frequent_value = find_most_frequent_for_categorical_col(df, categorical_column=key)
+                df[key] = df[key].fillna(most_frequent_value)
+
+            elif pd.api.types.is_numeric_dtype(df[key]): # numerical
+                # fill with median
+                median_value = find_median_for_numerical_col(df, numerical_column= key)
+                df[key] = df[key].fillna(median_value)
+    
+    return df
+
+def create_lists_for_column_types(df: pd.DataFrame) -> tuple:
+    """
+    create list for numerical and categorical columns.
+    Args : 
+        df(pd.DataFrame): Cleaned dataframe without Nan values.
+    Returns :   
+        Lists of different columns of df.
+    """
+    df_columns = df.columns.tolist()
+
+    numerical_cols   = []
+    categorical_cols = []
+    unkown_cols      = []
+
+    for col in df_columns:
+        
+        if not pd.api.types.is_numeric_dtype(df[col]): # categorical
+            categorical_cols.append(col)
+        elif pd.api.types.is_numeric_dtype(df[col]): # numerical
+            numerical_cols.append(col)
+        else:
+            unkown_cols.append(col)
+
+    print(f"""
+          Total columns :{len(df_columns)}, 
+          Numerical columns : {len(numerical_cols)},  
+          Categorical columns : {len(categorical_cols)}, 
+          Unkown columns : {len(unkown_cols)}
+        """)
+
+    if len(unkown_cols) != 0 :
+        gf.fail(msg=f"Unkown type found in columns!!! \n {unkown_cols}", error="Wrong type")
+
+    return df_columns, numerical_cols, categorical_cols
+
+def treat_categorical_columns(df: pd.DataFrame, categorical_cols:list)-> pd.DataFrame:
+    """
+    convert categorical columns to numerical with get dummies.
+    Args : 
+        df(pd.DataFrame): Cleaned dataframe without Nan values.
+        categorical_cols (list): list of categorical columns.
+    Returns :   
+        df with no categorical columns.
+    """
+    for col in categorical_cols:
+        if df[col].nunique() == 2: # binary categorical
+            df = pd.get_dummies(df, columns=[col], drop_first=True, dtype=int)
+        elif df[col].nunique() > 2: # multi categorical
+            df = pd.get_dummies(df, columns=[col], dtype=int)
     
     return df

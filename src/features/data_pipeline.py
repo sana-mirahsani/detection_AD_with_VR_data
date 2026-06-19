@@ -155,23 +155,23 @@ def creating_trajectory_dictionary(df: pd.DataFrame, dominant_hand: str, not_dom
     return trajectory_dictionary
 
 # Functions (2.Data_preprocessing) =========================================================
-def check_Nan_values(numeric_df: pd.DataFrame, missing_values_threshold: float)-> pd.DataFrame:
+def check_Nan_values(original_df: pd.DataFrame, missing_values_threshold: float)-> pd.DataFrame:
     """
     Check Nan values existence in a dataframe, then decide to treate them depends on the number of Nan values.
     Args : 
-        numeric_df(pd.DataFrame): df with only Numerical columns (cleaned already from categorical).
+        df (pd.DataFrame): Original df.
         missing_values_threshold(float): A float number to check if the column should be removed or filled.
     Returns :   
-        cleaned_df(pd.DataFrame): dict with columns and number of their missing values.
+        cleaned_df
     """
     # check Nan values existence
-    missing_values_dict = du.create_dict_for_Nan_values(df=numeric_df)
+    missing_values_dict = du.create_dict_for_Nan_values(df=original_df)
 
     if len(missing_values_dict) != 0:
         # Handling missing values
         print(f"Missing values found, number of columns with Nan values : {len(missing_values_dict)}")
 
-        cleaned_df = du.treat_missing_values(df=numeric_df, 
+        cleaned_df = du.treat_missing_values(df=original_df, 
                                              missing_values=missing_values_dict, 
                                              threshold= missing_values_threshold)
 
@@ -185,3 +185,27 @@ def check_Nan_values(numeric_df: pd.DataFrame, missing_values_threshold: float)-
         print("All Nan values are handled successfuly.")
         
     return cleaned_df
+
+def check_columns_type(df_without_Nan: pd.DataFrame):
+   """
+    Check types of columns, categorical and numerical then convert categorical to numerical.
+    Args : 
+        df (pd.DataFrame): Original df.
+        missing_values_threshold(float): A float number to check if the column should be removed or filled.
+    Returns :   
+        cleaned_df
+    """
+   print("Columns before one hot encoding : ")
+   _, _, categorical_cols = du.create_lists_for_column_types(df_without_Nan)
+
+   if len(categorical_cols) > 0:
+    df_without_Nan = du.treat_categorical_columns(df_without_Nan, categorical_cols)
+    
+    print("\n Columns after one hot encoding : ")
+    df_columns, numerical_cols, categorical_cols = du.create_lists_for_column_types(df_without_Nan)
+
+    # check after to ensure
+    if len(categorical_cols) > 0:
+        gf.fail(msg="Categorical columns even after changing!!!",error="Wrong type")
+    
+    return df_columns, numerical_cols, categorical_cols
