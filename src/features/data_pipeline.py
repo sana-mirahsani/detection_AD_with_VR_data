@@ -7,6 +7,7 @@ sys.path.append('../')
 from features import data_utils as du
 from features import general_func as gf
 
+# Functions (notebook 0.cleaning_basic_phase) =========================================================
 # piple for cleaning functions
 def pipeline_cleaning(list_patient_id: list,
                       patients_data_folder: str) -> None:
@@ -51,6 +52,7 @@ def pipeline_cleaning(list_patient_id: list,
         print("Cleaning OK, next patient...")
     print("Cleaning process completed.")
 
+# Functions (notebook 1.Extract_paitent_vector(local)) =========================================================
 # Pipeline for creating feature vectors
 def creating_event_dictionary(df: pd.DataFrame, phase_name: str, empty_dictionaries:list, extra_features_empty_dictionaries:list, phase_duration:float) -> dict:
     """
@@ -151,3 +153,35 @@ def creating_trajectory_dictionary(df: pd.DataFrame, dominant_hand: str, not_dom
     gf.general_dict_check(trajectory_dictionary, "trajectory_dictionary", None)
     
     return trajectory_dictionary
+
+# Functions (2.Data_preprocessing) =========================================================
+def check_Nan_values(numeric_df: pd.DataFrame, missing_values_threshold: float)-> pd.DataFrame:
+    """
+    Check Nan values existence in a dataframe, then decide to treate them depends on the number of Nan values.
+    Args : 
+        numeric_df(pd.DataFrame): df with only Numerical columns (cleaned already from categorical).
+        missing_values_threshold(float): A float number to check if the column should be removed or filled.
+    Returns :   
+        cleaned_df(pd.DataFrame): dict with columns and number of their missing values.
+    """
+    # check Nan values existence
+    missing_values_dict = du.create_dict_for_Nan_values(df=numeric_df)
+
+    if len(missing_values_dict) != 0:
+        # Handling missing values
+        print(f"Missing values found, number of columns with Nan values : {len(missing_values_dict)}")
+
+        cleaned_df = du.treat_missing_values(df=numeric_df, 
+                                             missing_values=missing_values_dict, 
+                                             threshold= missing_values_threshold)
+
+    # check again to ensure
+    missing_values_dict = du.create_dict_for_Nan_values(df=cleaned_df)    
+
+    if cleaned_df.isna().values.any():
+        # still having Nan values even after cleaning
+        gf.fail(msg="nan values even after cleaning!!!",error="ValueError")
+    else:
+        print("All Nan values are handled successfuly.")
+        
+    return cleaned_df

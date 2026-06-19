@@ -137,6 +137,8 @@ def get_order(item):
         if ref in item:
             return i
     gf.fail(msg="Unmactched files csv!!!", error="ValueError") 
+
+# Functions for 1.Extract_paitent_vector(local)=========================================================
 # Extraction functions =========================================================
 def extract_value_from_string(s:str, pattern_list:list) -> str | None:
     """
@@ -1002,3 +1004,43 @@ def filling_patient_dict(df: pd.DataFrame, paitent_dict: dict, row_index: int)->
         gf.fail(msg='None value found in paitent_dict!!!', error='ValueError')
 
     return paitent_dict
+
+# Preprocessing functions (notebook 2.Data_preprocessing) =========================================================
+def create_dict_for_Nan_values(df: pd.DataFrame) -> dict:
+    """
+    create dictionary for missing values with thier columns.
+    Args : 
+        df(pd.DataFrame): original dataframe.
+        threshold(float): A floa number to check if the column should be removed or filled.
+    Returns :   
+        col_with_Nan_values(dict): dict with columns and number of their missing values.
+    """
+    col_with_Nan_values = {}
+    col_with_Nan_values = df.isna().sum()[df.isna().sum() > 0].to_dict()
+
+    return col_with_Nan_values
+
+def treat_missing_values(df: pd.DataFrame, missing_values : dict, threshold: float)-> pd.DataFrame:
+    """
+    Decide function for missing values.
+    Args : 
+        missing_values(dict): dict with columns and number of their missing values.
+        df(pd.DataFrame): original dataframe.
+        threshold(float): A float number to check if the column should be removed or filled.
+    Returns :   
+        The original dataframe without missing values.
+    """
+    for key, item in missing_values.items():
+        
+        num_missing = missing_values[key]
+
+        # case 1: if more than threshold, remove column
+        if num_missing > (threshold * len(df)):
+            df = df.drop(columns=[key])
+
+        # case 2: if less than threshold, fill column by median
+        else : 
+            median_value = df[key].median()
+            df[key] = df[key].fillna(median_value)
+    
+    return df
