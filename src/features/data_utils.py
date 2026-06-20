@@ -1118,10 +1118,18 @@ def treat_categorical_columns(df: pd.DataFrame, categorical_cols:list)-> pd.Data
     Returns :   
         df with no categorical columns.
     """
+    columns_to_remove = []
+
     for col in categorical_cols:
         if df[col].nunique() == 2: # binary categorical
             df = pd.get_dummies(df, columns=[col], drop_first=True, dtype=int)
-        elif df[col].nunique() > 2: # multi categorical
+        
+        elif 2 < df[col].nunique() <= 5 : # multi categorical
             df = pd.get_dummies(df, columns=[col], dtype=int)
+
+        elif df[col].nunique() > 5: # useless, remove column
+            columns_to_remove.append(col)
+    
+    df = df.drop(columns=columns_to_remove)
     
     return df
