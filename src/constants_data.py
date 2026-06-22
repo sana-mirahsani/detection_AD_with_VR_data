@@ -6,7 +6,8 @@ patient_dict = {
     "Gender"        : np.nan,
     "dominant_hand" : np.nan,
     "Sessions_Completed_out_of_4" : np.nan, 
-    "Help_Rating_out_of_5" : np.nan
+    "Help_Rating_out_of_5" : np.nan,
+    "MoCA_Score" : np.nan
 }
 
 # statistical features
