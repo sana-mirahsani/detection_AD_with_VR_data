@@ -212,31 +212,32 @@ def check_columns_type(df_without_Nan: pd.DataFrame):
         print("All Categorical columns are encoded successfuly.")
     return df_without_Nan
 
-def check_zero_sum_column(df_without_categorical_column: pd.DataFrame):
+def check_constant_column(df_without_categorical_column: pd.DataFrame):
     """
-    Check usless columns (that have only zero values), then remove them.
+    Check usless columns (that have only constant values), then remove them.
     Args : 
         df (pd.DataFrame): output df of check_columns_type func.
     Returns :   
         cleaned_df
     """
-    print(f"Columns before removing zero_only columns : {len(df_without_categorical_column.columns)}")
-    zero_cols = du.create_lists_for_zero_columns(df_without_categorical_column)
+    print(f"Columns before removing constant columns : {len(df_without_categorical_column.columns)}")
+    constant_cols = du.create_lists_for_constant_columns(df_without_categorical_column)
    
-    if len(zero_cols) > 0:
-        print(f"There are {len(zero_cols)} columns with zero values, removing them...")
+    if len(constant_cols) > 0:
+        print(f"There are {len(constant_cols)} constant columns, removing them...")
 
-    df_without_categorical_column = du.treat_zero_columns(df_without_categorical_column, zero_cols)
+    df_without_categorical_column = du.treat_constant_columns(df_without_categorical_column, constant_cols)
     
-    print(f"\n Columns after removing zero_only columns : {len(df_without_categorical_column.columns)}")
+    print(f"\n Columns after removing constant columns : {len(df_without_categorical_column.columns)}")
     
-    zero_cols = du.create_lists_for_zero_columns(df_without_categorical_column)
+    constant_cols = du.create_lists_for_constant_columns(df_without_categorical_column)
    
     # check after to ensure
-    if len(zero_cols) > 0:
-        print(zero_cols)
-        gf.fail(msg="Zero_value columns even after changing!!!",error="Wrong type")
+    if len(constant_cols) > 0:
+        print(constant_cols)
+        gf.fail(msg="Constant columns even after changing!!!",error="Wrong type")
     else:
-        print("All zero value columns are removed successfuly.")
+        print("All constant columns are removed successfuly.")
+        
     return df_without_categorical_column
    

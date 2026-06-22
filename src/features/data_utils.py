@@ -989,20 +989,15 @@ def filling_patient_dict(df: pd.DataFrame, paitent_dict: dict, row_index: int)->
     Returns:
         dict: paitent_dict(filled).
     """
+    
     paitent_dict["Paitent_id"] = df.iloc[row_index]['PatientID']
     paitent_dict["Age"]        = df.iloc[row_index]['Age']
     paitent_dict["Gender"]     = df.iloc[row_index]['Gender']
     paitent_dict["dominant_hand"]     = df.iloc[row_index]['dominant_hand']
     paitent_dict["Sessions_Completed_out_of_4"] = df.iloc[row_index]['Sessions_Completed_out_of_4']
     paitent_dict["Help_Rating_out_of_5"]        = df.iloc[row_index]['Help_Rating_out_of_5']
-
-    # check none values
-    missing_keys = [k for k, v in paitent_dict.items() if pd.isna(v)]
-
-    if len(missing_keys) > 0:
-        print(missing_keys)
-        gf.fail(msg='None value found in paitent_dict!!!', error='ValueError')
-
+    paitent_dict["MoCA_Score"]                  = df.iloc[row_index]["MoCA_Score_or_Completed"]
+    
     return paitent_dict
 
 # Preprocessing functions (notebook 2.Data_preprocessing) =========================================================
@@ -1134,24 +1129,24 @@ def treat_categorical_columns(df: pd.DataFrame, categorical_cols:list)-> pd.Data
     
     return df
 
-def create_lists_for_zero_columns(df: pd.DataFrame)-> list:
+def create_lists_for_constant_columns(df: pd.DataFrame)-> list:
     """
-    Find the columns with only zero values.
+    Find the columns with only one value.
     Args :
         df(pd.DataFrame): Cleaned dataframe without categorical cols.
     Returns :
-        List: columns with zero values.
+        List: columns with constant values.
     """
-    return df.columns[(df == 0).all()]
+    return df.columns[df.nunique() <= 1]
 
-def treat_zero_columns(df: pd.DataFrame, zero_cols: list)-> pd.DataFrame:
+def treat_constant_columns(df: pd.DataFrame, constant_cols: list)-> pd.DataFrame:
     """
-    Remove columns with only zero values.
+    Remove columns with constant values.
     Args :
         df(DataFrame): Cleaned dataframe without categorical cols.
-        zero_cols(list): list of zero value columns.
+        constant_cols(list): list of constant columns.
     Retunrs:
-        Dataframe: without zero columns.
+        Dataframe: without constant columns.
     """
-    df = df.drop(columns=zero_cols)
+    df = df.drop(columns=constant_cols)
     return df
