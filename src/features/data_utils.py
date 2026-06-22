@@ -1133,3 +1133,25 @@ def treat_categorical_columns(df: pd.DataFrame, categorical_cols:list)-> pd.Data
     df = df.drop(columns=columns_to_remove)
     
     return df
+
+def create_lists_for_zero_columns(df: pd.DataFrame)-> list:
+    """
+    Find the columns with only zero values.
+    Args :
+        df(pd.DataFrame): Cleaned dataframe without categorical cols.
+    Returns :
+        List: columns with zero values.
+    """
+    return df.columns[(df == 0).all()]
+
+def treat_zero_columns(df: pd.DataFrame, zero_cols: list)-> pd.DataFrame:
+    """
+    Remove columns with only zero values.
+    Args :
+        df(DataFrame): Cleaned dataframe without categorical cols.
+        zero_cols(list): list of zero value columns.
+    Retunrs:
+        Dataframe: without zero columns.
+    """
+    df = df.drop(columns=zero_cols)
+    return df

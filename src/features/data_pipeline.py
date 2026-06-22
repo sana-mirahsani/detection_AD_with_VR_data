@@ -201,12 +201,42 @@ def check_columns_type(df_without_Nan: pd.DataFrame):
    if len(categorical_cols) > 0:
     df_without_Nan = du.treat_categorical_columns(df_without_Nan, categorical_cols)
     
-    print("\n Columns after one hot encoding : +-")
+    print("\n Columns after one hot encoding : ")
     df_columns, numerical_cols, categorical_cols = du.create_lists_for_column_types(df_without_Nan)
 
     # check after to ensure
     if len(categorical_cols) > 0:
         print(categorical_cols)
         gf.fail(msg="Categorical columns even after changing!!!",error="Wrong type")
-    
+    else:
+        print("All Categorical columns are encoded successfuly.")
     return df_without_Nan
+
+def check_zero_sum_column(df_without_categorical_column: pd.DataFrame):
+    """
+    Check usless columns (that have only zero values), then remove them.
+    Args : 
+        df (pd.DataFrame): output df of check_columns_type func.
+    Returns :   
+        cleaned_df
+    """
+    print(f"Columns before removing zero_only columns : {len(df_without_categorical_column.columns)}")
+    zero_cols = du.create_lists_for_zero_columns(df_without_categorical_column)
+   
+    if len(zero_cols) > 0:
+        print(f"There are {len(zero_cols)} columns with zero values, removing them...")
+
+    df_without_categorical_column = du.treat_zero_columns(df_without_categorical_column, zero_cols)
+    
+    print(f"\n Columns after removing zero_only columns : {len(df_without_categorical_column.columns)}")
+    
+    zero_cols = du.create_lists_for_zero_columns(df_without_categorical_column)
+   
+    # check after to ensure
+    if len(zero_cols) > 0:
+        print(zero_cols)
+        gf.fail(msg="Zero_value columns even after changing!!!",error="Wrong type")
+    else:
+        print("All zero value columns are removed successfuly.")
+    return df_without_categorical_column
+   
