@@ -241,3 +241,54 @@ def check_constant_column(df_without_categorical_column: pd.DataFrame):
         
     return df_without_categorical_column
    
+def check_correlation(df_without_constant_columns: pd.DataFrame):
+    """
+    Check correlations between target-columns, and column_column.
+    Args : 
+        df_without_constant_columns (pd.DataFrame): output df of check_constant_column func.
+    Returns :   
+        cleaned_df
+    """
+    all_columns     = df_without_constant_columns.columns.tolist()
+    useless_columns = []
+
+    print(f'Number of columns before removing {len(df_without_constant_columns.columns)}')
+
+    correlation_series     = du.create_correlation_series(df_without_constant_columns, "MoCA_Score")
+    nan_correlation_series = du.create_nan_correlation(correlation_series)
+
+    if len(nan_correlation_series) > 0 :
+        print(f'Number of Nan correlation {len(nan_correlation_series)}')
+        useless_columns.extend(nan_correlation_series)
+    else:
+        print('No Nan correlation.')
+
+    small_corr = du.find_small_corr_cols_with_threshold(correlation_series, 0.2)
+
+    if len(small_corr) > 0 :
+        print(f'Number of small correlation {len(small_corr)}')
+        useless_columns.extend(small_corr)
+    else:
+        print('No small correlation')
+    
+    useful_columns = [col for col in all_columns if col not in useless_columns]
+
+    feature_corr = du.create_correlation_matrix_abs(df_without_constant_columns, useful_columns)
+    redundant_features = du.find_redundant_features(feature_corr)
+
+    if len(redundant_features) > 0 :
+        print(f'Number of redundant features {len(redundant_features)}')
+        useless_columns.extend(redundant_features)
+    else:
+        print('No redundant features')
+    
+    if len(useless_columns)> 0 :
+        print(f'Number of total useless columns {len(useless_columns)}, Removing them...')
+        df_without_constant_columns = du.treat_useless_correlations(df_without_constant_columns, useless_columns)
+        print('All useless correlations are removed successfully.')
+    else :
+        print('No useless correlation is found!')
+    
+    print(f'Number of columns after removing {len(df_without_constant_columns.columns)}')
+
+    return df_without_constant_columns

@@ -1150,3 +1150,71 @@ def treat_constant_columns(df: pd.DataFrame, constant_cols: list)-> pd.DataFrame
     """
     df = df.drop(columns=constant_cols)
     return df
+
+def create_correlation_series(df: pd.DataFrame, target_col: str) -> pd.Series:
+    """
+    Create correlation series between columns and target.
+    Args : 
+        df(pd.DataFrame) : dataframe.
+        target_col(str): target column.
+    Returns :   
+        series of correaltion with target and all columns.
+    """
+    return df.corr()[target_col].sort_values(ascending=False)
+
+def create_nan_correlation(correlation_series: pd.Series) -> list:
+    """
+    Create list of Nan correlation columns with target.
+    Args : 
+        correlation_series(pd.Series) : series of correlation between columns and target.
+        threshold(float): less than this, remove it.
+    Returns :   
+        List
+    """
+    return correlation_series[correlation_series.isna()].index.tolist()
+
+def find_small_corr_cols_with_threshold(correlation_series: pd.Series, threshold: float) -> list:
+    """
+    Find small correlations by threshold.
+    Args : 
+        correlation_series(pd.Series) : series of correlation between columns and target.
+        threshold(float): less than this, remove it.
+    Returns :   
+        List
+    """
+    return correlation_series[abs(correlation_series) < threshold].index.tolist()
+
+def create_correlation_matrix_abs(df: pd.DataFrame, selected_cols: list)-> pd.DataFrame:
+    """
+    create correlation matrix with abs values from columns with
+    high correlation with target.
+    Args : 
+        df(pd.DataFrame) : df
+        selected_cols(list) : list of columns.
+    Returns :   
+        feature matrix (dataframe)
+    """
+    return df[selected_cols].corr().abs()
+
+def find_redundant_features(feature_corr: pd.DataFrame)-> list:
+    """
+    Find the columns with high correlation, return them as a list.
+    Args : 
+        feature_corr(pd.DataFrame): Feature correlation matirx.
+    Returns :   
+        Lists of columns with high correlations (they are redundant).
+    """
+    upper = feature_corr.where(np.triu(np.ones(feature_corr.shape), k=1).astype(bool))
+    return [column for column in upper.columns if any(upper[column] > 0.9)]
+    
+def treat_useless_correlations(df: pd.DataFrame, useless_corr: list)-> pd.DataFrame:
+    """
+    Remove all small or nan correlation and redudant columns.
+    Args : 
+        df(pd.DataFrame): Cleaned dataframe without Nan values.
+        useless_corr (list): list of useless columns.
+    Returns :   
+        df with no useless columns.
+    """
+    df = df.drop(columns= useless_corr)
+    return df
