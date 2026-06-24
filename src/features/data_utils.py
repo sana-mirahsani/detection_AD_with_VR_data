@@ -1037,7 +1037,7 @@ def find_most_frequent_for_categorical_col(df: pd.DataFrame, categorical_column:
     """
     return df[categorical_column].mode()[0]
 
-def treat_missing_values(df: pd.DataFrame, missing_values : dict, threshold: float)-> pd.DataFrame:
+def treat_missing_values(df: pd.DataFrame, missing_values : dict, threshold: float, target_column: str)-> pd.DataFrame:
     """
     Decide function for missing values.
     Args : 
@@ -1047,15 +1047,18 @@ def treat_missing_values(df: pd.DataFrame, missing_values : dict, threshold: flo
     Returns :   
         The original dataframe without missing values.
     """
+    columns_to_delete = []
+
     for key, item in missing_values.items():
         
         num_missing = missing_values[key]
 
-        # case 1: if more than threshold, remove column
-        if num_missing > (threshold * len(df)):
+        # case 1: if more than threshold and its not the target column, remove column
+        if num_missing > (threshold * len(df)) and key!= target_column:
             df = df.drop(columns=[key])
+            columns_to_delete.append(key)
 
-        # case 2: if less than threshold, fill column by median or most frequent 
+        # case 2: if less than threshold or it is the target column, fill column by median or most frequent 
         else : 
             if not pd.api.types.is_numeric_dtype(df[key]): # categorical
                 # fill with most frequent
@@ -1066,6 +1069,8 @@ def treat_missing_values(df: pd.DataFrame, missing_values : dict, threshold: flo
                 # fill with median
                 median_value = find_median_for_numerical_col(df, numerical_column= key)
                 df[key] = df[key].fillna(median_value)
+    
+    print(f"Removed columns :{columns_to_delete}")
     
     return df
 

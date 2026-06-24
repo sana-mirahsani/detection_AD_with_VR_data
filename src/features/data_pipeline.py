@@ -155,7 +155,7 @@ def creating_trajectory_dictionary(df: pd.DataFrame, dominant_hand: str, not_dom
     return trajectory_dictionary
 
 # Functions (2.Data_preprocessing) =========================================================
-def check_Nan_values(original_df: pd.DataFrame, missing_values_threshold: float)-> pd.DataFrame:
+def check_Nan_values(original_df: pd.DataFrame, missing_values_threshold: float, target_col: str)-> pd.DataFrame:
     """
     Check Nan values existence in a dataframe, then decide to treate them depends on the number of Nan values.
     Args : 
@@ -170,10 +170,11 @@ def check_Nan_values(original_df: pd.DataFrame, missing_values_threshold: float)
     if len(missing_values_dict) != 0:
         # Handling missing values
         print(f"Missing values found, number of columns with Nan values : {len(missing_values_dict)}")
-
+        print(missing_values_dict)
         cleaned_df = du.treat_missing_values(df=original_df, 
                                              missing_values=missing_values_dict, 
-                                             threshold= missing_values_threshold)
+                                             threshold= missing_values_threshold,
+                                             target_column= target_col)
 
     # check again to ensure
     missing_values_dict = du.create_dict_for_Nan_values(df=cleaned_df)    
