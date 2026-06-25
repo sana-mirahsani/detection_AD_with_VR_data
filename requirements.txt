@@ -2,3 +2,5 @@ pandas
 numpy
 importlib
 pathlib
+mlflow
+seaborn

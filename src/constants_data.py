@@ -1,4 +1,10 @@
 import numpy as np
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
+from sklearn.svm import SVR, LinearSVR
+from sklearn.neural_network import MLPRegressor
+
 # empty dictionaries
 patient_dict = {
     "Paitent_id"    : np.nan,
@@ -188,3 +194,18 @@ clean_csv_file_correct_order = [
     '03_Visuospatial_events.csv', '03_Visuospatial_trajectory.csv',
     '04_Memory_events.csv', '04_Memory_trajectory.csv'
     ]
+
+# Different experiments for solution 1 : Predicting MoCA score by 20 real patients with real scores
+# all these experiments include the CV (cross validation)
+# All these experiments will have different runs on mlflow
+
+models = [LinearRegression, Ridge, RandomForestRegressor, XGBRegressor, SVR, LinearSVR, MLPRegressor, Lasso]
+experiment_1 = ("all", models)
+experiment_2 = ("SelectKBest(50)", models)
+experiment_3 = ("SelectKBest(20)", models)
+experiment_4 = ("SelectKBest(10)", models)
+experiment_5 = ("RFECV", models)
+experiment_6 = ("VarianceThreshold", models)
+experiment_7 = ("PCA", models)
+
+all_experiments = [experiment_1, experiment_2, experiment_3, experiment_4, experiment_5, experiment_6, experiment_7]
