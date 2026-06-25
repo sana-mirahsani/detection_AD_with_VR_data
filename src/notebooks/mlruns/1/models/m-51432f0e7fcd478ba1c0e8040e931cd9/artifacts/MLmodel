@@ -1,0 +1,24 @@
+artifact_path: /home/smira/myproject/detection_AD_with_VR_data/src/notebooks/mlruns/1/models/m-51432f0e7fcd478ba1c0e8040e931cd9/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.skops
+    predict_fn: predict
+    python_version: 3.14.4
+  sklearn:
+    code: null
+    pickled_model: model.skops
+    serialization_format: skops
+    sklearn_version: 1.9.0
+    skops_trusted_types:
+    - xgboost.sklearn.XGBRegressor
+mlflow_version: 3.14.0
+model_id: m-51432f0e7fcd478ba1c0e8040e931cd9
+model_size_bytes: 30284
+model_uuid: m-51432f0e7fcd478ba1c0e8040e931cd9
+prompts: null
+run_id: c7954811313a40ec8e6c3128b17394b5
+utc_time_created: '2026-06-25 14:55:23.957915'

@@ -1,0 +1,23 @@
+artifact_path: /home/smira/myproject/detection_AD_with_VR_data/mlruns/1/models/m-4341d3ee33054c30af52a739ffd42add/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.skops
+    predict_fn: predict
+    python_version: 3.14.4
+  sklearn:
+    code: null
+    pickled_model: model.skops
+    serialization_format: skops
+    sklearn_version: 1.9.0
+    skops_trusted_types: null
+mlflow_version: 3.14.0
+model_id: m-4341d3ee33054c30af52a739ffd42add
+model_size_bytes: 12175
+model_uuid: m-4341d3ee33054c30af52a739ffd42add
+prompts: null
+run_id: 0c5b7908eada45afa7144827e9b6834a
+utc_time_created: '2026-06-25 15:37:45.946514'
