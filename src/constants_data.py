@@ -200,12 +200,13 @@ clean_csv_file_correct_order = [
 # All these experiments will have different runs on mlflow
 
 models = [LinearRegression, Ridge, RandomForestRegressor, XGBRegressor, SVR, LinearSVR, MLPRegressor, Lasso]
-experiment_1 = ("all", models)
-experiment_2 = ("SelectKBest(50)", models)
-experiment_3 = ("SelectKBest(20)", models)
-experiment_4 = ("SelectKBest(10)", models)
-experiment_5 = ("RFECV", models)
-experiment_6 = ("VarianceThreshold", models)
-experiment_7 = ("PCA", models)
+# (feature_selection_method, list of models, k value)
+experiment_1 = ("all_features", models, 0)
+experiment_2 = ("SelectKBest", models, 50)
+experiment_3 = ("SelectKBest", models, 20)
+experiment_4 = ("SelectKBest", models, 10)
+experiment_5 = ("RFECV", models, 5)
+experiment_6 = ("VarianceThreshold", models, 0)
+experiment_7 = ("PCA", models, 5)
 
 all_experiments = [experiment_1, experiment_2, experiment_3, experiment_4, experiment_5, experiment_6, experiment_7]

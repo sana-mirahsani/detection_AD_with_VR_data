@@ -8,6 +8,8 @@ sys.path.append('../')
 from features import general_func as gf
 import constants_data as cd
 
+from sklearn.feature_selection import SelectKBest
+
 importlib.reload(gf)
 importlib.reload(cd)
 
@@ -1223,3 +1225,24 @@ def treat_useless_correlations(df: pd.DataFrame, useless_corr: list)-> pd.DataFr
     """
     df = df.drop(columns= useless_corr)
     return df
+
+def select_k_best_features(num_feautre: int, score_func: function, X_df: pd.DataFrame, y_series: pd.Series)-> np.ndarray:
+    """
+    Select k best columns from df.
+    Args : 
+        num_feautre(int): Number of feature to select
+        score_func(function): Function to calculate the score
+        X_df(pd.DataFrame): X df
+        y_series(pd.Series): target columns 
+    Returns :   
+        np.ndarray : New X df with less columns.
+    """
+    selector = SelectKBest(score_func, k=num_feautre)
+    X_new = selector.fit_transform(X_df, y_series)
+
+    # un comment to restore column names
+    #selected_features = X_df.columns[selector.get_support()]
+    #X_new_df = pd.DataFrame(X_new, columns=selected_features)
+    #return X_new_df
+
+    return X_new
