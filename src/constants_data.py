@@ -195,9 +195,14 @@ clean_csv_file_correct_order = [
     '04_Memory_events.csv', '04_Memory_trajectory.csv'
     ]
 
-# Different experiments for solution 1 : Predicting MoCA score by 20 real patients with real scores
-# all these experiments include the CV (cross validation)
-# All these experiments will have different runs on mlflow
+# Model Designing constants ====================================================================
+"""
+Different experiments for solution 1 : Predicting MoCA score by 20 real patients with real scores
+Feature selection + models training 
+
+all these experiments include the CV (cross validation)
+All these experiments will have different runs on mlflow
+"""
 
 models = [LinearRegression, Ridge, RandomForestRegressor, XGBRegressor, SVR, LinearSVR, MLPRegressor, Lasso]
 # (feature_selection_method, list of models, k value)
@@ -209,4 +214,23 @@ experiment_5 = ("RFECV", models, 5)
 experiment_6 = ("VarianceThreshold", models, 0)
 experiment_7 = ("PCA", models, 5)
 
-all_experiments = [experiment_1, experiment_2, experiment_3, experiment_4, experiment_5, experiment_6, experiment_7]
+all_experiments_sol_1 = [experiment_1, experiment_2, experiment_3, experiment_4, experiment_5, experiment_6, experiment_7]
+
+"""
+Different experiments for solution 2 : Predicting MoCA score by 20 real patients with real scores
+data augmentation + training model
+
+all these experiments include the CV (cross validation)
+All these experiments will have different runs on mlflow
+"""
+# (data_augmentation_method, list of models)
+experiment_1 = ("zero_aug", models)
+experiment_2 = ("gaussian_noise", models)
+experiment_3 = ("smogn", models)
+experiment_4 = ("smoter", models)
+experiment_5 = ("gaussian_copula", models)
+experiment_6 = ("vae", models)
+experiment_7 = ("ctgan", models)
+experiment_8 = ("bootstrapping", models)
+
+all_experiments_sol_2 = [experiment_1, experiment_2, experiment_3, experiment_4, experiment_5, experiment_6, experiment_7]

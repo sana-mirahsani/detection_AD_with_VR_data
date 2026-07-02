@@ -1246,3 +1246,29 @@ def select_k_best_features(num_feautre: int, score_func: function, X_df: pd.Data
     #return X_new_df
 
     return X_new
+
+# Data augmentation methods ======================================================
+def guassian_noise_pipeline(loc:float = 0.0, scale:float=1.0, 
+                            X_train_scaled: pd.DataFrame= None, y_train: pd.Series= None,
+                            original_cols= None):
+
+    # create noise
+    noise = create_noise(loc, scale, X_train_scaled)
+
+    return create_new_data(noise, X_train_scaled, y_train, original_cols)
+
+def create_noise(loc:float = 0.0, scale:float=1.0, x_train_shape:tuple= None):
+    return np.random.normal(loc, scale, x_train_shape.shape)
+
+def create_new_data(noise, X_train_scaled, y_train, original_cols):
+    augmented_X_train = X_train_scaled + noise
+    return pd.concat([pd.DataFrame(X_train_scaled,columns=original_cols), pd.DataFrame(augmented_X_train, columns=original_cols)], axis=0), pd.concat([y_train, y_train], axis=0)
+
+def rescale_func(X_train, X_test):
+    from sklearn.preprocessing import StandardScaler
+
+    # create transformer
+    scaler = StandardScaler()
+    scaler.fit(X_train)
+
+    return scaler.transform(X_train), scaler.transform(X_test)
