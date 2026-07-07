@@ -155,6 +155,23 @@ def creating_trajectory_dictionary(df: pd.DataFrame, dominant_hand: str, not_dom
     return trajectory_dictionary
 
 # Functions (2.Data_preprocessing) =========================================================
+def create_target_column(df: pd.DataFrame):
+
+    # 1. Fill young patients with 26 score
+    df.loc[20:,'MoCA_Score'] = 26
+
+    # 2. Fill Nan value of real patient
+    median_score = df['MoCA_Score'].median()
+    df['MoCA_Score'] = df['MoCA_Score'].fillna(median_score)
+
+    # 3. Create target column 
+    df['Target'] = df['MoCA_Score'].apply(du.severity_level_MoCA)
+
+    # 4. Remove MoCA_Score column
+    df = df.drop(columns=['MoCA_Score'])
+
+    return df
+
 def check_Nan_values(original_df: pd.DataFrame, missing_values_threshold: float, target_col: str)-> pd.DataFrame:
     """
     Check Nan values existence in a dataframe, then decide to treate them depends on the number of Nan values.

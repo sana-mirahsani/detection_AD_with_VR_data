@@ -1226,6 +1226,31 @@ def treat_useless_correlations(df: pd.DataFrame, useless_corr: list)-> pd.DataFr
     df = df.drop(columns= useless_corr)
     return df
 
+def severity_level_MoCA(score: int)-> int:
+    """
+    Convert score vlaues to moderate and severe groups.
+    Args: 
+        socore(int): score value from dataset.
+    Returns:
+        Class of target as Integer
+
+    """
+    match score:
+        case _ if score >= 26:
+            return  0  # Normal
+
+        case _ if 18 <= score >= 25:
+            return  1  # Mild impairment
+        
+        case _ if 10 <= score >= 17:
+            return  2  # Moderate impairment
+        
+        case _ if 0 <= score >= 9:
+            return  3  # Severe impairment
+        
+        case _ :
+            gf.fail(msg= "Score not found!", error=ValueError)
+# Feature selection methods ======================================================
 def select_k_best_features(num_feautre: int, score_func: function, X_df: pd.DataFrame, y_series: pd.Series)-> np.ndarray:
     """
     Select k best columns from df.
