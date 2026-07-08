@@ -1249,7 +1249,8 @@ def severity_level_MoCA(score: int)-> int:
             return  3  # Severe impairment
         
         case _ :
-            gf.fail(msg= "Score not found!", error=ValueError)
+            gf.fail(msg= "Score not found!", error="ValueError")
+
 # Feature selection methods ======================================================
 def select_k_best_features(num_feautre: int, score_func: function, X_df: pd.DataFrame, y_series: pd.Series)-> np.ndarray:
     """
