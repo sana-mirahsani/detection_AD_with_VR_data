@@ -1,11 +1,9 @@
 import numpy as np
-from sklearn.linear_model import RidgeClassifier, LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import DecisionTreeClassifier
-from xgboost import XGBClassifier
-from sklearn.svm import SVC, LinearSVC
-from sklearn.neural_network import MLPClassifier
-
+from sklearn.linear_model import Ridge, LinearRegression, Lasso
+from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
+from sklearn.svm import SVR, LinearSVR
+from sklearn.neural_network import MLPRegressor
 
 # empty dictionaries
 patient_dict = {
@@ -200,23 +198,22 @@ clean_csv_file_correct_order = [
 # Model Designing constants ====================================================================
 """
 Different experiments for solution 1 : Predicting MoCA score by 20 real patients with real scores
-Feature selection + classification_models training 
+Feature selection + models training 
 
 all these experiments include the CV (cross validation)
 All these experiments will have different runs on mlflow
 """
 
-#classification_models = [LinearRegression, Ridge, RandomForestRegressor, XGBRegressor, SVR, LinearSVR, MLPRegressor, Lasso]
-classification_models = [LogisticRegression, RidgeClassifier, RandomForestClassifier, XGBClassifier, SVC, LinearSVC, MLPClassifier]
+models = [LinearRegression, Ridge, RandomForestRegressor, XGBRegressor, SVR, LinearSVR, MLPRegressor, Lasso]
 
-# (feature_selection_method, list of classification_models, k value)
-experiment_1 = ("all_features", classification_models, 0)
-experiment_2 = ("SelectKBest", classification_models, 50)
-experiment_3 = ("SelectKBest", classification_models, 20)
-experiment_4 = ("SelectKBest", classification_models, 10)
-experiment_5 = ("RFECV", classification_models, 5)
-experiment_6 = ("VarianceThreshold", classification_models, 0)
-experiment_7 = ("PCA", classification_models, 5)
+# (feature_selection_method, list of models, k value)
+experiment_1 = ("all_features", models, 0)
+experiment_2 = ("SelectKBest", models, 50)
+experiment_3 = ("SelectKBest", models, 20)
+experiment_4 = ("SelectKBest", models, 10)
+experiment_5 = ("RFECV", models, 5)
+experiment_6 = ("VarianceThreshold", models, 0)
+experiment_7 = ("PCA", models, 5)
 
 all_experiments_sol_1 = [experiment_1, experiment_2, experiment_3, experiment_4, experiment_5, experiment_6, experiment_7]
 
@@ -227,14 +224,14 @@ data augmentation + training model
 all these experiments include the CV (cross validation)
 All these experiments will have different runs on mlflow
 """
-# (data_augmentation_method, list of classification_models)
-experiment_1 = ("zero_aug", classification_models)
-experiment_2 = ("gaussian_noise", classification_models)
-experiment_3 = ("smogn", classification_models)
-experiment_4 = ("smoter", classification_models)
-experiment_5 = ("gaussian_copula", classification_models)
-experiment_6 = ("vae", classification_models)
-experiment_7 = ("ctgan", classification_models)
-experiment_8 = ("bootstrapping", classification_models)
+# (data_augmentation_method, list of models)
+experiment_1 = ("zero_aug", models)
+experiment_2 = ("gaussian_noise", models)
+experiment_3 = ("smogn", models)
+experiment_4 = ("smoter", models)
+experiment_5 = ("gaussian_copula", models)
+experiment_6 = ("vae", models)
+experiment_7 = ("ctgan", models)
+experiment_8 = ("bootstrapping", models)
 
 all_experiments_sol_2 = [experiment_1, experiment_2, experiment_3, experiment_4, experiment_5, experiment_6, experiment_7]
