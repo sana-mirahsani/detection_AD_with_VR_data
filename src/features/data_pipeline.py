@@ -274,42 +274,12 @@ def check_constant_column(df_without_categorical_column: pd.DataFrame):
         
     return df_without_categorical_column
 
-def check_correlation_feature_vs_feature(df_without_constant_columns: pd.DataFrame) -> pd.DataFrame:
-    """
-    Check correlations between columns.
-    Args : 
-        df_without_constant_columns (pd.DataFrame): output df of check_constant_column func.
-    Returns :
-        List of redudant features.
-        
-    """
-    all_columns = df_without_constant_columns.columns.tolist()
-
-    feature_corr = du.create_correlation_matrix_abs(df_without_constant_columns, all_columns)
-    redundant_features = du.find_redundant_features(feature_corr)
-
-    if len(redundant_features) > 0 :
-        print(f'Number of redundant features {len(redundant_features)}')
-        return redundant_features
-    else:
-        print('No redundant features')
-        return None
-
-def check_correlation_targ_vs_feature(df_without_constant_columns: pd.DataFrame, ) -> pd.DataFrame:
-    """
-    Check correlations between target and columns.
-    Args : 
-        df_without_constant_columns (pd.DataFrame): output df of check_constant_column func.
-    Returns :   
-        List of low correlation.
-    """
-    
-
-def check_correlation(df_without_constant_columns: pd.DataFrame):
+def check_correlation(df_without_constant_columns: pd.DataFrame, target: str):
     """
     Check correlations between target-columns, and column_column.
     Args : 
         df_without_constant_columns (pd.DataFrame): output df of check_constant_column func.
+        target (str): Name of target column.
     Returns :   
         cleaned_df
     """
@@ -318,7 +288,7 @@ def check_correlation(df_without_constant_columns: pd.DataFrame):
 
     print(f'Number of columns before removing {len(df_without_constant_columns.columns)}')
 
-    correlation_series     = du.create_correlation_series(df_without_constant_columns, "Target")
+    correlation_series     = du.create_correlation_series(df_without_constant_columns, target)
     nan_correlation_series = du.create_nan_correlation(correlation_series)
 
     if len(nan_correlation_series) > 0 :
