@@ -204,18 +204,15 @@ all these experiments include the CV (cross validation)
 All these experiments will have different runs on mlflow
 """
 
-models = [LinearRegression, Ridge, RandomForestRegressor, XGBRegressor, SVR, LinearSVR, MLPRegressor, Lasso]
+models = [LinearRegression, Ridge, RandomForestRegressor, XGBRegressor, SVR, Lasso]
 
 # (feature_selection_method, list of models, k value)
 experiment_1 = ("all_features", models, 0)
 experiment_2 = ("SelectKBest", models, 50)
 experiment_3 = ("SelectKBest", models, 20)
-experiment_4 = ("SelectKBest", models, 10)
-experiment_5 = ("RFECV", models, 5)
-experiment_6 = ("VarianceThreshold", models, 0)
-experiment_7 = ("PCA", models, 5)
+experiment_4 = ("PCA", models, 5)
 
-all_experiments_sol_1 = [experiment_1, experiment_2, experiment_3, experiment_4, experiment_5, experiment_6, experiment_7]
+all_experiments_sol_1 = [experiment_1, experiment_2, experiment_3, experiment_4]
 
 """
 Different experiments for solution 2 : Predicting MoCA score by 20 real patients with real scores

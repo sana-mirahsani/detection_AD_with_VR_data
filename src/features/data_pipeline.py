@@ -187,7 +187,7 @@ def create_target_column(df: pd.DataFrame):
     print("MoCA column is dropped and Target column is created successfully.")
     return df
 
-def check_Nan_values(original_df: pd.DataFrame, missing_values_threshold: float, target_col: str)-> pd.DataFrame:
+def check_Nan_values(original_df: pd.DataFrame, missing_values_threshold: float)-> pd.DataFrame:
     """
     Check Nan values existence in a dataframe, then decide to treate them depends on the number of Nan values.
     Args : 
@@ -205,17 +205,18 @@ def check_Nan_values(original_df: pd.DataFrame, missing_values_threshold: float,
         print(missing_values_dict)
         cleaned_df = du.treat_missing_values(df=original_df, 
                                              missing_values=missing_values_dict, 
-                                             threshold= missing_values_threshold,
-                                             target_column= target_col)
+                                             threshold= missing_values_threshold)
 
     # check again to ensure
     missing_values_dict = du.create_dict_for_Nan_values(df=cleaned_df)    
 
     if cleaned_df.isna().values.any():
+        columns_with_nan = cleaned_df.columns[cleaned_df.isna().any()]
+        
         # still having Nan values even after cleaning
         gf.fail(msg="nan values even after cleaning!!!",error="ValueError")
-    else:
-        print("All Nan values are handled successfuly.")
+    
+    print("All Nan values are handled successfuly.")
         
     return cleaned_df
 

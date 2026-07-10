@@ -1039,7 +1039,7 @@ def find_most_frequent_for_categorical_col(df: pd.DataFrame, categorical_column:
     """
     return df[categorical_column].mode()[0]
 
-def treat_missing_values(df: pd.DataFrame, missing_values : dict, threshold: float, target_column: str)-> pd.DataFrame:
+def treat_missing_values(df: pd.DataFrame, missing_values : dict, threshold: float)-> pd.DataFrame:
     """
     Decide function for missing values.
     Args : 
@@ -1055,8 +1055,8 @@ def treat_missing_values(df: pd.DataFrame, missing_values : dict, threshold: flo
         
         num_missing = missing_values[key]
 
-        # case 1: if more than threshold and its not the target column, remove column
-        if num_missing > (threshold * len(df)) and key!= target_column:
+        # case 1: if more than threshold, remove column
+        if num_missing > (threshold * len(df)):
             df = df.drop(columns=[key])
             columns_to_delete.append(key)
 

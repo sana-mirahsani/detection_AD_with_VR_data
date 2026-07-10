@@ -1,8 +1,0 @@
-Result 1
-data : 20 samples (only patients)
-columns : 120
-scaling : True
-model : Ridge()
-result socre : -2.73448
-===============================
-Result 2
