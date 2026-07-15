@@ -204,7 +204,14 @@ all these experiments include the CV (cross validation)
 All these experiments will have different runs on mlflow
 """
 
-models = [LinearRegression, Ridge, RandomForestRegressor, XGBRegressor, SVR, Lasso]
+models = [
+    ("LinearRegression", LinearRegression),
+    ("Ridge", Ridge),
+    ("RandomForest", lambda: RandomForestRegressor(random_state=42)),
+    ("XGBRegressor", lambda: XGBRegressor(random_state=42)),
+    ("SVR", SVR),
+    ("Lasso", Lasso),
+]
 
 # (feature_selection_method, list of models, k value)
 experiment_1 = ("all_features", models, 0)
