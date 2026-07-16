@@ -194,7 +194,7 @@ def check_Nan_values(original_df: pd.DataFrame, missing_values_threshold: float)
         df (pd.DataFrame): Original df.
         missing_values_threshold(float): A float number to check if the column should be removed or filled.
     Returns :   
-        cleaned_df
+        cleaned_df , df without any nan value
     """
     # check Nan values existence
     missing_values_dict = du.create_dict_for_Nan_values(df=original_df)
@@ -326,4 +326,4 @@ def check_correlation(df_without_constant_columns: pd.DataFrame, target: str):
     
     print(f'Number of columns after removing {len(df_without_constant_columns.columns)}')
 
-    return df_without_constant_columns
+    return df_without_constant_columns, useless_columns

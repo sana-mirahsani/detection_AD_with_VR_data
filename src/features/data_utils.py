@@ -1129,7 +1129,7 @@ def treat_categorical_columns(df: pd.DataFrame, categorical_cols:list)-> pd.Data
         elif 2 < df[col].nunique() <= 5 : # multi categorical
             df = pd.get_dummies(df, columns=[col], dtype=int)
 
-        elif df[col].nunique() > 5: # useless, remove column
+        elif (df[col].nunique() > 5) or (df[col].nunique() == 1): # useless, remove column
             columns_to_remove.append(col)
     
     df = df.drop(columns=columns_to_remove)
