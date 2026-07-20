@@ -10,12 +10,13 @@ from features import general_func as gf
 # Functions (notebook 0.cleaning_basic_phase) =========================================================
 # piple for cleaning functions
 def pipeline_cleaning(list_patient_id: list,
-                      patients_data_folder: str) -> None:
+                      input_path: str, output_path: str) -> None:
     """
     cleaning process, removing Section Break rows and add Activity Log column as the last row.
     Args: 
         list_patient_id(List): All ids of patients as a list.
-        patients_data_folder(str): Path of data folder.
+        input_path(str): Path of raw data folder.
+        output_path(str): Path for save data.
     Returns:
         None: check the directory, must see a new folder called clean_data.
     """
@@ -24,11 +25,11 @@ def pipeline_cleaning(list_patient_id: list,
     for patient_id in list_patient_id:
         print(f"Processing patient ID: {patient_id}")
         
-        current_patient_data_folder = data_utils.find_patient_folder(patients_data_folder, patient_id)
+        current_patient_data_folder = data_utils.find_patient_folder(input_path, patient_id)
 
         if current_patient_data_folder is None:
             print(f"Patient folder not found for ID: {patient_id} !!!!!!!!!")
-            continue
+            break
 
         list_of_csv_files = data_utils.find_csv_file(folder_path=current_patient_data_folder)
         
@@ -39,9 +40,7 @@ def pipeline_cleaning(list_patient_id: list,
 
             input_path_of_csv = current_patient_data_folder / csv_file
             
-            Path(current_patient_data_folder / "clean_data").mkdir(exist_ok=True)
-            
-            output_path_of_csv = current_patient_data_folder / 'clean_data' / f"cleaned_{csv_file}"
+            output_path_of_csv = output_path / patient_id / f"cleaned_{csv_file}"
 
             success, error = data_utils.cleaning_csv_file(csv_path_to_read=input_path_of_csv, 
                                         csv_path_to_write=output_path_of_csv)
