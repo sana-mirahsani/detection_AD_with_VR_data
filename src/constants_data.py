@@ -5,6 +5,9 @@ from xgboost import XGBRegressor
 from sklearn.svm import SVR, LinearSVR
 from sklearn.neural_network import MLPRegressor
 
+# df names to save
+FEATURE_EXTRACTION_Df_NAME = 'extracted_features.csv'
+
 # empty dictionaries
 patient_dict = {
     "Paitent_id"    : np.nan,

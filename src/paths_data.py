@@ -37,8 +37,8 @@ for folder in [
 
 # Create Cleaning folder for each patient
 JSON_PATIENTS_DETAILS = RAW_DATA_DIR / "patients_data_log.json"
+
 df_data_log = pd.read_json(JSON_PATIENTS_DETAILS)
 patient_ids = df_data_log["PatientID"].to_list()
-
 for id in patient_ids:
     Path(STAGE_ONE_BASIC_CLEANING / id).mkdir(exist_ok=True)
