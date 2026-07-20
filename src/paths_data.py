@@ -8,7 +8,6 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
 INTERIM_DATA_DIR = DATA_DIR / "interim"
-PROCESSED_DATA_DIR = DATA_DIR / "processed"
 PREDICTIONS_DIR = DATA_DIR / "predictions"
 
 # Sub Data Folder
@@ -16,22 +15,26 @@ STAGE_ONE_BASIC_CLEANING       = INTERIM_DATA_DIR / "stage_one_basic_cleaning"
 STAGE_TWO_FEATURE_EXTRACTION   = INTERIM_DATA_DIR / "stage_two_feature_extraction"
 STAGE_THREE_DATA_PREPROCESSING = INTERIM_DATA_DIR / "stage_three_data_preprocessing"
 
-# Models
-MODELS_DIR = PROJECT_ROOT / "models"
+PREDICTS_SOLTUION_ONE   =  PREDICTIONS_DIR / "predicts_sol_one"
+PREDICTS_SOLTUION_TWO   =  PREDICTIONS_DIR / "predicts_sol_two"
+PREDICTS_SOLTUION_THREE =  PREDICTIONS_DIR / "predicts_sol_three"
 
-# Preprocessing
-PREPROCESSING_DIR = PROJECT_ROOT / "preprocessing"
+# Models
+MODELS_DIR_SOL_ONE   = PROJECT_ROOT / "models" / "solution_one"
+MODELS_DIR_SOL_TWO   = PROJECT_ROOT / "models" / "solution_two"
+MODELS_DIR_SOL_THREE = PROJECT_ROOT / "models" / "solution_three"
+
 
 # Create directories if they don't exist
 for folder in [
     RAW_DATA_DIR,
-    PROCESSED_DATA_DIR,
     PREDICTIONS_DIR,
     STAGE_ONE_BASIC_CLEANING,
     STAGE_TWO_FEATURE_EXTRACTION,
     STAGE_THREE_DATA_PREPROCESSING,
-    MODELS_DIR,
-    PREPROCESSING_DIR,
+    MODELS_DIR_SOL_ONE,
+    MODELS_DIR_SOL_TWO,
+    MODELS_DIR_SOL_THREE,
 ]:
     folder.mkdir(parents=True, exist_ok=True)
 
