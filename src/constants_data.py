@@ -7,6 +7,9 @@ from sklearn.neural_network import MLPRegressor
 
 # df names to save
 FEATURE_EXTRACTION_Df_NAME = 'extracted_features.csv'
+name_13_old_patients   = "cleaned_features_13_patients.csv"
+name_20_young_patients = "cleaned_features_20_young_patients.csv"
+name_7_old_patients    = "cleaned_features_7_old_patients.csv"
 
 # empty dictionaries
 patient_dict = {

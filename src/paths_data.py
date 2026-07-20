@@ -24,6 +24,7 @@ MODELS_DIR_SOL_ONE   = PROJECT_ROOT / "models" / "solution_one"
 MODELS_DIR_SOL_TWO   = PROJECT_ROOT / "models" / "solution_two"
 MODELS_DIR_SOL_THREE = PROJECT_ROOT / "models" / "solution_three"
 
+COLUMNS_TO_REMOVE =  INTERIM_DATA_DIR / "columns_to_remove.txt"
 
 # Create directories if they don't exist
 for folder in [
