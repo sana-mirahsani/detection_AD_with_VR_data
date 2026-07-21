@@ -1,7 +1,7 @@
 import re
 import pandas as pd
-from datetime import datetime
 import numpy as np
+from io import StringIO
 import sys
 import importlib
 sys.path.append('../') 
@@ -1299,3 +1299,76 @@ def severity_level_MoCA(score: int)-> int:
         
         case _ :
             gf.fail(msg= "Score not found!", error="ValueError")
+
+# Result_Visualization methods ======================================================
+def read_readme_tables(readme_path: str)-> pd.DataFrame:
+    """
+    Convert readme results to a df.
+    Args: 
+        readme_path(str): readme results.
+    Returns:
+        df of all results
+    """
+    experiments = []
+
+    with open(readme_path, "r") as f:
+        lines = f.readlines()
+
+    current_experiment = None
+    table_lines = []
+    inside_table = False
+
+    for line in lines:
+        line = line.strip()
+
+        # Detect experiment name
+        if line.startswith("## Experiment"):
+            current_experiment = line.replace("## ", "")
+
+        # Detect table start
+        if line.startswith("| Model"):
+            inside_table = True
+            table_lines = [line]
+
+        elif inside_table:
+            if line.startswith("|"):
+                table_lines.append(line)
+            else:
+                inside_table = False
+
+                if len(table_lines) > 2:
+                    table_text = "\n".join(table_lines)
+
+                    df = pd.read_csv(
+                        StringIO(table_text.replace("|", ",")),
+                        skiprows=[1]
+                    )
+
+                    df.columns = df.columns.str.strip()
+                    df["Experiment"] = current_experiment
+
+                    experiments.append(df)
+
+                table_lines = []
+
+    # Combine all experiments
+    all_results = pd.concat(experiments, ignore_index=True)
+    all_results = all_results.dropna(axis=1, how="all")
+    return all_results
+
+def convert_columns_to_numerical(df: pd.DataFrame, cols_to_convert : list) -> pd.DataFrame:
+    """
+    Convert string columns to numerical.
+    Args:
+        df: dataframe without any numerical columns.
+        cols_to_convert : columns that should be numerical.
+    Returns:
+        same df but with real numerical columns.
+    """
+    for col in cols_to_convert:
+        df[col] = pd.to_numeric(
+            df[col],
+            errors="coerce"
+        )
+
+    return df

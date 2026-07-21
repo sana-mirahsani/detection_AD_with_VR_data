@@ -245,3 +245,24 @@ experiment_7 = ("ctgan", models)
 experiment_8 = ("bootstrapping", models)
 
 all_experiments_sol_2 = [experiment_1, experiment_2, experiment_3, experiment_4, experiment_5, experiment_6, experiment_7]
+
+# Dictionary of result visualization
+mean_models_MSE_dict = {
+                "All 120 Features" : None,
+                "SelectKBest (50 Features)" : None,
+                "SelectKBest (20 Features)" : None,
+                "SelectKBest (10 Features)" : None,
+                "RFECV" : None,
+                "Variance threshold" : None,
+                "PCA (5 Components)" : None
+                }
+
+mean_models_overfitting_dict = {
+                "All 120 Features" : None,
+                "SelectKBest (50 Features)" : None,
+                "SelectKBest (20 Features)" : None,
+                "SelectKBest (10 Features)" : None,
+                "RFECV" : None,
+                "Variance threshold" : None,
+                "PCA (5 Components)" : None
+                }
