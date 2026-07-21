@@ -1,6 +1,9 @@
 pandas
 numpy
-importlib
-pathlib
+scikit-learn
+xgboost
 mlflow
-seaborn
+matplotlib
+joblib
+Jupyter
+Pathlib
