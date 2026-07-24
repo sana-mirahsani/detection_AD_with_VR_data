@@ -326,3 +326,23 @@ def check_correlation(df_without_constant_columns: pd.DataFrame, target: str):
     print(f'Number of columns after removing {len(df_without_constant_columns.columns)}')
 
     return df_without_constant_columns, useless_columns
+
+# Pipeline of data augmentation methods
+def guassian_noise_pipeline(mean:float = 0.0, standard_deviation:float=1.0, 
+                            X_train_scaled: pd.DataFrame= None, y_train: pd.Series= None,
+                            original_cols: list= None):
+    """
+    Pipeline of creating and adding noise to Train set.
+    Args:
+        mean(float). 
+        standard_deviation(float), 
+        X_train_scaled(pd.DataFrame): input scaled data, 
+        y_train (pd.Series): ,
+        original_cols (list): List of columns.
+    Return:
+        Tuple : New X and y with double size.
+    """
+    # create noise
+    noise = du.create_noise(mean, standard_deviation, X_train_scaled)
+
+    return du.create_new_data(noise, X_train_scaled, y_train, original_cols)

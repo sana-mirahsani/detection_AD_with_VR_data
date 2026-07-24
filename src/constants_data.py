@@ -220,12 +220,12 @@ models = [
 ]
 
 # (feature_selection_method, list of models, k value)
-experiment_1 = ("all_features", models, 0)
-experiment_2 = ("SelectKBest", models, 50)
-experiment_3 = ("SelectKBest", models, 20)
-experiment_4 = ("PCA", models, 5)
+experiment_1_fs = ("all_features", models, 0)
+experiment_2_fs = ("SelectKBest", models, 50)
+experiment_3_fs = ("SelectKBest", models, 20)
+experiment_4_fs = ("PCA", models, 5)
 
-all_experiments_sol_1 = [experiment_1, experiment_2, experiment_3, experiment_4]
+all_experiments_sol_1 = [experiment_1_fs, experiment_2_fs, experiment_3_fs, experiment_4_fs]
 
 """
 Different experiments for solution 2 : Predicting MoCA score by 20 real patients with real scores
@@ -235,16 +235,11 @@ all these experiments include the CV (cross validation)
 All these experiments will have different runs on mlflow
 """
 # (data_augmentation_method, list of models)
-experiment_1 = ("zero_aug", models)
-experiment_2 = ("gaussian_noise", models)
-experiment_3 = ("smogn", models)
-experiment_4 = ("smoter", models)
-experiment_5 = ("gaussian_copula", models)
-experiment_6 = ("vae", models)
-experiment_7 = ("ctgan", models)
-experiment_8 = ("bootstrapping", models)
+experiment_1_dg = ("gaussian_noise", models)
+experiment_2_dg = ("smoter", models)
+experiment_3_dg = ("gaussian_copula", models)
 
-all_experiments_sol_2 = [experiment_1, experiment_2, experiment_3, experiment_4, experiment_5, experiment_6, experiment_7]
+all_experiments_sol_2 = [experiment_1_dg, experiment_2_dg, experiment_3_dg]
 
 # Dictionary of result visualization
 mean_models_MSE_dict = {

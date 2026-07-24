@@ -1249,30 +1249,52 @@ def select_k_best_features(num_feautre: int, score_func: function, X_df: pd.Data
     return X_new
 
 # Data augmentation methods ======================================================
-def guassian_noise_pipeline(loc:float = 0.0, scale:float=1.0, 
-                            X_train_scaled: pd.DataFrame= None, y_train: pd.Series= None,
-                            original_cols= None):
-
-    # create noise
-    noise = create_noise(loc, scale, X_train_scaled)
-
-    return create_new_data(noise, X_train_scaled, y_train, original_cols)
-
 def create_noise(loc:float = 0.0, scale:float=1.0, x_train_shape:tuple= None):
+    """
+    Generate a Gaussian noise array to be added to training data.
+
+    Args:
+        loc (float): Mean of the Gaussian distribution the noise is drawn
+            from. Defaults to 0.0.
+        scale (float): Standard deviation of the Gaussian distribution,
+            controlling the magnitude of the noise. Defaults to 1.0.
+        x_train_shape (tuple): Object whose `.shape` attribute gives the
+            desired output shape (typically the training data array itself,
+            e.g. X_train_scaled), so the returned noise array matches it
+            element-wise.
+
+    Returns:
+        numpy.ndarray: Array of Gaussian noise values with the same shape
+        as `x_train_shape`, ready to be added to the training data.
+    """
     return np.random.normal(loc, scale, x_train_shape.shape)
 
 def create_new_data(noise, X_train_scaled, y_train, original_cols):
+    """
+    Augment the training set by adding Gaussian noise to create synthetic
+    samples, then concatenate them with the original data.
+
+    Args:
+        noise (numpy.ndarray): Noise array (e.g. from `create_noise`) with
+            the same shape as `X_train_scaled`, to be added element-wise.
+        X_train_scaled (numpy.ndarray): Scaled/preprocessed training
+            features to augment.
+        y_train (pandas.Series or pandas.DataFrame): Target values
+            corresponding to `X_train_scaled`.
+        original_cols (list of str): Column names to assign to the
+            resulting feature DataFrames.
+
+    Returns:
+        tuple:
+            pandas.DataFrame: Concatenation of the original training
+            features and the noise-augmented synthetic features
+            (2 * n_samples rows, same columns as `original_cols`).
+            pandas.Series or pandas.DataFrame: Concatenation of `y_train`
+            with itself, aligned row-for-row with the returned features
+            (since synthetic samples reuse the original targets).
+    """
     augmented_X_train = X_train_scaled + noise
     return pd.concat([pd.DataFrame(X_train_scaled,columns=original_cols), pd.DataFrame(augmented_X_train, columns=original_cols)], axis=0), pd.concat([y_train, y_train], axis=0)
-
-def rescale_func(X_train, X_test):
-    from sklearn.preprocessing import StandardScaler
-
-    # create transformer
-    scaler = StandardScaler()
-    scaler.fit(X_train)
-
-    return scaler.transform(X_train), scaler.transform(X_test)
 
 # Predict_Targets methods ======================================================
 def severity_level_MoCA(score: int)-> int:
